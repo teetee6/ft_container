@@ -65,11 +65,13 @@ class RedBlackTree {
   }
 
   // For balancing the tree after deletion
+  // s가 그림 상의 w(sibling)임
   void deleteFix(NodePtr x) {
     NodePtr s;
     while (x != root && x->color == 0) {
       if (x == x->parent->left) {
         s = x->parent->right;
+        // case1 
         if (s->color == 1) {
           s->color = 0;
           x->parent->color = 1;
@@ -77,10 +79,13 @@ class RedBlackTree {
           s = x->parent->right;
         }
 
+        // 이 아래에 왔다는거 자체가 s->color == 0 이란거임
+        // case2
         if (s->left->color == 0 && s->right->color == 0) {
           s->color = 1;
           x = x->parent;
         } else {
+          // case3
           if (s->right->color == 0) {
             s->left->color = 0;
             s->color = 1;
@@ -88,6 +93,7 @@ class RedBlackTree {
             s = x->parent->right;
           }
 
+          // case4
           s->color = x->parent->color;
           x->parent->color = 0;
           s->right->color = 0;

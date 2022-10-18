@@ -334,26 +334,28 @@ __tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
     // __w is __x's possibly null uncle (will become __x's sibling)
     _NodePtr __w = nullptr;
     // link __x to __y's parent, and find __w
+    //// y를 독립시키는 과정
     if (__x != nullptr)
         __x->__parent_ = __y->__parent_;
-    if (__tree_is_left_child(__y))
+    if (__tree_is_left_child(__y)) // root또한  left_child임
     {
         __y->__parent_->__left_ = __x;
         if (__y != __root)
             __w = __y->__parent_unsafe()->__right_;
         else
-            __root = __x;  // __w == nullptr
+            __root = __x;  // __w == nullptr        // 원소 딱 1개있었는데  지웠다면 __root = NIL 일 거임.
     }
-    else
+    else // 여기 진입은, 확실한건 루트는 아니란거임
     {
         __y->__parent_unsafe()->__right_ = __x;
         // __y can't be root if it is a right child
         __w = __y->__parent_->__left_;
     }
+    //// y를 독립시키는 과정 끝
     bool __removed_black = __y->__is_black_;
     // If we didn't remove __z, do so now by splicing in __y for __z,
     //    but copy __z's color.  This does not impact __x or __w.
-    if (__y != __z)
+    if (__y != __z) // 자식 2개 있음
     {
         // __z->__left_ != nulptr but __z->__right_ might == __x == nullptr
         __y->__parent_ = __z->__parent_;
@@ -386,8 +388,10 @@ __tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
         //   is either red with no children, else null, otherwise __y would have
         //   different black heights under left and right pointers.
         // if (__x == __root || __x != nullptr && !__x->__is_black_)
-        if (__x != nullptr)
+        if (__x != nullptr) // __x는 당연히 red다. __y가 분리되기 전 자식으로 __x = __y->right일텐데, 그때 당시 __x가 black이면, 그때당시의 y입장에선 왼쪽오른쪽 black깊이가 다르다!
             __x->__is_black_ = true;
+        // __x가 nullptr인 이유? 높이가 2이상 차이나는 그런 모양이 이미 최적화가 되었기에 나올수가 없음!!
+        // 그래서 사실상 초기 removeFix()진입시에는, NIL에 doubly-black이 붙음.
         else
         {
             //  Else __x isn't root, and is "doubly black", even though it may
@@ -399,6 +403,7 @@ __tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
             {
                 if (!__tree_is_left_child(__w))  // if x is left child
                 {
+                    // case 1
                     if (!__w->__is_black_)
                     {
                         __w->__is_black_ = true;
@@ -411,6 +416,7 @@ __tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
                         // reset sibling, and it still can't be null
                         __w = __w->__left_->__right_;
                     }
+                    // case2
                     // __w->__is_black_ is now true, __w may have null children
                     if ((__w->__left_  == nullptr || __w->__left_->__is_black_) &&
                         (__w->__right_ == nullptr || __w->__right_->__is_black_))
@@ -431,6 +437,7 @@ __tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
                     }
                     else  // __w has a red child
                     {
+                        // case3
                         if (__w->__right_ == nullptr || __w->__right_->__is_black_)
                         {
                             // __w left child is non-null and red
@@ -441,6 +448,7 @@ __tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
                             // reset sibling, and it still can't be null
                             __w = __w->__parent_unsafe();
                         }
+                        // case4
                         // __w has a right red child, left child may be null
                         __w->__is_black_ = __w->__parent_unsafe()->__is_black_;
                         __w->__parent_unsafe()->__is_black_ = true;
@@ -530,24 +538,15 @@ struct __tree_key_value_types {
   typedef _Tp __container_value_type;
   static const bool __is_map = false;
 
-  _LIBCPP_INLINE_VISIBILITY
   static key_type const& __get_key(_Tp const& __v) {
     return __v;
   }
-  _LIBCPP_INLINE_VISIBILITY
   static __container_value_type const& __get_value(__node_value_type const& __v) {
     return __v;
   }
-  _LIBCPP_INLINE_VISIBILITY
   static __container_value_type* __get_ptr(__node_value_type& __n) {
     return _VSTD::addressof(__n);
   }
-#ifndef _LIBCPP_CXX03_LANG
-  _LIBCPP_INLINE_VISIBILITY
-  static __container_value_type&& __move(__node_value_type& __v) {
-    return _VSTD::move(__v);
-  }
-#endif
 };
 
 template <class _Key, class _Tp>
@@ -559,21 +558,19 @@ struct __tree_key_value_types<__value_type<_Key, _Tp> > {
   typedef __container_value_type                       __map_value_type;
   static const bool __is_map = true;
 
-  _LIBCPP_INLINE_VISIBILITY
   static key_type const&
   __get_key(__node_value_type const& __t) {
     return __t.__get_value().first;
   }
 
   template <class _Up>
-  _LIBCPP_INLINE_VISIBILITY
   static typename enable_if<__is_same_uncvref<_Up, __container_value_type>::value,
       key_type const&>::type
   __get_key(_Up& __t) {
     return __t.first;
   }
 
-  _LIBCPP_INLINE_VISIBILITY
+    // pair<>를 돌려준다
   static __container_value_type const&
   __get_value(__node_value_type const& __t) {
     return __t.__get_value();
@@ -587,17 +584,10 @@ struct __tree_key_value_types<__value_type<_Key, _Tp> > {
     return __t;
   }
 
-  _LIBCPP_INLINE_VISIBILITY
   static __container_value_type* __get_ptr(__node_value_type& __n) {
     return _VSTD::addressof(__n.__get_value());
   }
 
-#ifndef _LIBCPP_CXX03_LANG
-  _LIBCPP_INLINE_VISIBILITY
-  static pair<key_type&&, mapped_type&&> __move(__node_value_type& __v) {
-    return __v.__move();
-  }
-#endif
 };
 
 template <class _VoidPtr>
@@ -691,7 +681,6 @@ public:
     typedef _Pointer pointer;
     pointer __left_;
 
-    _LIBCPP_INLINE_VISIBILITY
     __tree_end_node() _NOEXCEPT : __left_() {}
 };
 
@@ -789,7 +778,7 @@ struct __generic_container_node_destructor<__tree_node<_Tp, _VoidPtr>, _Alloc>
 #endif
 
 template <class _Tp, class _NodePtr, class _DiffType>
-class _LIBCPP_TEMPLATE_VIS __tree_iterator
+class __tree_iterator
 {
     typedef __tree_node_types<_NodePtr>                     _NodeTypes;
     typedef _NodePtr                                        __node_pointer;
@@ -946,13 +935,6 @@ private:
     template <class> friend class _LIBCPP_TEMPLATE_VIS __map_const_iterator;
 
 };
-
-template<class _Tp, class _Compare>
-#ifndef _LIBCPP_CXX03_LANG
-    _LIBCPP_DIAGNOSE_WARNING(!std::__invokable<_Compare const&, _Tp const&, _Tp const&>::value,
-        "the specified comparator type does not provide a viable const call operator")
-#endif
-int __diagnose_non_const_comparator();
 
 template <class _Tp, class _Compare, class _Allocator>
 class __tree
