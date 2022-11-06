@@ -1,4 +1,9 @@
+#ifndef __WRAP_ITERATOR_HPP_
+#define __WRAP_ITERATOR_HPP_
+
 #include "iterator.hpp"
+
+namespace ft {
 
 template <class _Iter> //int라 생각하시오(공식 라이브러리는 int *임)
 class __wrap_iter
@@ -23,6 +28,12 @@ public:
         return *this;
     }
     virtual ~__wrap_iter() {}
+	operator __wrap_iter<const _Iter>() {	//__wrap_iter<const _Iter> a = __wrap_iter<_Iter>  (((conversion operator))) const_iterator it = iterator;
+		return __wrap_iter<const _Iter>(this->__i);
+  	}
+	// operator reverse_iterator<_Iter>() {	//reverse_iterator<_Iter> a = __wrap_iter<_Iter>
+	// 	return reverse_iterator<_Iter *>(this->__i);
+  	// }
     reference operator*() const { return *__i; }
     pointer  operator->() const { return &(*__i); }
     __wrap_iter& operator++() { ++__i; return *this; }
@@ -110,3 +121,7 @@ __wrap_iter<_Iter> operator+(typename __wrap_iter<_Iter>::difference_type __n,
 {
     return __x + __n;
 }
+
+}
+
+#endif

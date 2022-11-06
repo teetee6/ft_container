@@ -1,3 +1,6 @@
+#ifndef __ITERATOR_HPP_
+#define __ITERATOR_HPP_
+
 #include <iostream>     // std::cout
 #include <typeinfo>     // typeid
 #include <cstddef>
@@ -160,3 +163,5 @@ reverse_iterator<_Iter> make_reverse_iterator(_Iter __i)
 
 
 }   // ft NAMESPACE
+
+#endif

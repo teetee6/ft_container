@@ -1,3 +1,8 @@
+#ifndef __UTILITY_HPP_
+#define __UTILITY_HPP_
+
+#include "iterator.hpp"
+
 namespace ft {
 
 template <typename _T1, typename _T2>
@@ -81,4 +86,20 @@ pair<_T1,_T2> make_pair(_T1 __x, _T2 __y)
     return pair<_T1, _T2>(__x, __y);
 }
 
+// distance로 바꿀까?
+template < class InputIterator >
+typename ft::iterator_traits< InputIterator >::difference_type difference(InputIterator first, InputIterator last) {
+  typedef typename ft::iterator_traits< InputIterator >::difference_type size_type;
+  size_type n = 0;
+  
+  while(first != last)
+  {
+	++n;
+	++first;
+  }
+  return n;
 }
+
+}
+
+#endif

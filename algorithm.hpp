@@ -1,3 +1,6 @@
+#ifndef __ALGORITHM_HPP_
+#define __ALGORITHM_HPP_
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -49,3 +52,5 @@ bool equal(_InputIterator1 first1, _InputIterator1 last1, _InputIterator2 first2
 }
 
 }
+
+#endif

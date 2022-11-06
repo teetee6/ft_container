@@ -1,4 +1,5 @@
-// #ifndef
+#ifndef __TYPE_TRAITS_HPP_
+#define __TYPE_TRAITS_HPP_
 
 #include <typeinfo>
 #include <iostream>
@@ -46,3 +47,5 @@ template <>          struct __libcpp_is_integral<__uint128_t>        : public tr
 template <class _Tp> struct is_integral : public __libcpp_is_integral<_Tp> {};
 
 }
+
+#endif

@@ -863,7 +863,7 @@ public:
     typedef typename _NodeTypes::__void_pointer        __void_pointer;
 
     typedef typename _NodeTypes::__node_type           __node;
-    typedef typename _NodeTypes::__node_pointer        __node_pointer;
+    typedef typename _NodeTypes::__node_pointer        __node_pointer; // ->로 연결노드 가리키기 용
 
     typedef typename _NodeTypes::__node_base_type      __node_base;
     typedef typename _NodeTypes::__node_base_pointer   __node_base_pointer;
@@ -872,7 +872,7 @@ public:
     typedef typename _NodeTypes::__end_node_pointer    __end_node_ptr;
 
     typedef typename _NodeTypes::__parent_pointer      __parent_pointer;
-    typedef typename _NodeTypes::__iter_pointer        __iter_pointer;
+    typedef typename _NodeTypes::__iter_pointer        __iter_pointer; // 노드에 대한 정보 참조
 
     typedef typename __rebind_alloc_helper<__alloc_traits, __node>::type __node_allocator;
     typedef allocator_traits<__node_allocator>         __node_traits;
@@ -884,8 +884,8 @@ private:
 
 private:
     __iter_pointer                                     __begin_node_;
-    __compressed_pair<__end_node_t, __node_allocator>  __pair1_;
-    __compressed_pair<size_type, value_compare>        __pair3_;
+    __compressed_pair<__end_node_t, __node_allocator>  __pair1_; //end_node 추정(root의 부모노드 입니다)
+    __compressed_pair<size_type, value_compare>        __pair3_; //size 추정
 
 public:
     __iter_pointer __end_node()
@@ -924,6 +924,7 @@ public:
     __tree(const value_compare& __comp, const allocator_type& __a);
     __tree(const __tree& __t);
     __tree& operator=(const __tree& __t);
+
     template <class _ForwardIterator>
     void __assign_unique(_ForwardIterator __first, _ForwardIterator __last);
     template <class _InputIterator>
@@ -1054,10 +1055,8 @@ public:
 
 #else
     template <class _Key, class _Args>
-    
     pair<iterator, bool> __emplace_unique_key_args(_Key const&, _Args& __args);
     template <class _Key, class _Args>
-    
     iterator __emplace_hint_unique_key_args(const_iterator, _Key const&, _Args&);
 #endif
 
@@ -1503,121 +1502,9 @@ __tree<_Tp, _Compare, _Allocator>::__tree(const __tree& __t)
     __begin_node() = __end_node();
 }
 
-#ifndef _LIBCPP_CXX03_LANG
-
-template <class _Tp, class _Compare, class _Allocator>
-__tree<_Tp, _Compare, _Allocator>::__tree(__tree&& __t)
-    _(
-        is_nothrow_move_constructible<__node_allocator>::value &&
-        is_nothrow_move_constructible<value_compare>::value)
-    : __begin_node_(_VSTD::move(__t.__begin_node_)),
-      __pair1_(_VSTD::move(__t.__pair1_)),
-      __pair3_(_VSTD::move(__t.__pair3_))
-{
-    if (size() == 0)
-        __begin_node() = __end_node();
-    else
-    {
-        __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
-        __t.__begin_node() = __t.__end_node();
-        __t.__end_node()->__left_ = nullptr;
-        __t.size() = 0;
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-__tree<_Tp, _Compare, _Allocator>::__tree(__tree&& __t, const allocator_type& __a)
-    : __pair1_(__default_init_tag(), __node_allocator(__a)),
-      __pair3_(0, _VSTD::move(__t.value_comp()))
-{
-    if (__a == __t.__alloc())
-    {
-        if (__t.size() == 0)
-            __begin_node() = __end_node();
-        else
-        {
-            __begin_node() = __t.__begin_node();
-            __end_node()->__left_ = __t.__end_node()->__left_;
-            __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
-            size() = __t.size();
-            __t.__begin_node() = __t.__end_node();
-            __t.__end_node()->__left_ = nullptr;
-            __t.size() = 0;
-        }
-    }
-    else
-    {
-        __begin_node() = __end_node();
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-void
-__tree<_Tp, _Compare, _Allocator>::__move_assign(__tree& __t, true_type)
-    _(is_nothrow_move_assignable<value_compare>::value &&
-               is_nothrow_move_assignable<__node_allocator>::value)
-{
-    destroy(static_cast<__node_pointer>(__end_node()->__left_));
-    __begin_node_ = __t.__begin_node_;
-    __pair1_.first() = __t.__pair1_.first();
-    __move_assign_alloc(__t);
-    __pair3_ = _VSTD::move(__t.__pair3_);
-    if (size() == 0)
-        __begin_node() = __end_node();
-    else
-    {
-        __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
-        __t.__begin_node() = __t.__end_node();
-        __t.__end_node()->__left_ = nullptr;
-        __t.size() = 0;
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-void
-__tree<_Tp, _Compare, _Allocator>::__move_assign(__tree& __t, false_type)
-{
-    if (__node_alloc() == __t.__node_alloc())
-        __move_assign(__t, true_type());
-    else
-    {
-        value_comp() = _VSTD::move(__t.value_comp());
-        const_iterator __e = end();
-        if (size() != 0)
-        {
-            _DetachedTreeCache __cache(this);
-            while (__cache.__get() != nullptr && __t.size() != 0) {
-              __cache.__get()->__value_ = _VSTD::move(__t.remove(__t.begin())->__value_);
-              __node_insert_multi(__cache.__get());
-              __cache.__advance();
-            }
-        }
-        while (__t.size() != 0)
-            __insert_multi(__e, _NodeTypes::__move(__t.remove(__t.begin())->__value_));
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-__tree<_Tp, _Compare, _Allocator>&
-__tree<_Tp, _Compare, _Allocator>::operator=(__tree&& __t)
-    _(
-        __node_traits::propagate_on_container_move_assignment::value &&
-        is_nothrow_move_assignable<value_compare>::value &&
-        is_nothrow_move_assignable<__node_allocator>::value)
-
-{
-    __move_assign(__t, integral_constant<bool,
-                  __node_traits::propagate_on_container_move_assignment::value>());
-    return *this;
-}
-
-#endif  // _LIBCPP_CXX03_LANG
-
 template <class _Tp, class _Compare, class _Allocator>
 __tree<_Tp, _Compare, _Allocator>::~__tree()
 {
-    static_assert((is_copy_constructible<value_compare>::value),
-                 "Comparator must be copy-constructible.");
   destroy(__root());
 }
 
@@ -1638,15 +1525,6 @@ __tree<_Tp, _Compare, _Allocator>::destroy(__node_pointer __nd)
 template <class _Tp, class _Compare, class _Allocator>
 void
 __tree<_Tp, _Compare, _Allocator>::swap(__tree& __t)
-#if _LIBCPP_STD_VER <= 11
-        _(
-            __is_nothrow_swappable<value_compare>::value
-            && (!__node_traits::propagate_on_container_swap::value ||
-                 __is_nothrow_swappable<__node_allocator>::value)
-            )
-#else
-        _(__is_nothrow_swappable<value_compare>::value)
-#endif
 {
     using _VSTD::swap;
     swap(__begin_node_, __t.__begin_node_);
@@ -2431,11 +2309,13 @@ __tree<_Tp, _Compare, _Allocator>::__lower_bound(const _Key& __v,
 {
     while (__root != nullptr)
     {
-        if (!value_comp()(__root->__value_, __v))
+		// <=
+        if (!value_comp()(__root->__value_, __v)) // __v <= __root->__value
         {
             __result = static_cast<__iter_pointer>(__root);
             __root = static_cast<__node_pointer>(__root->__left_);
         }
+		// >
         else
             __root = static_cast<__node_pointer>(__root->__right_);
     }
