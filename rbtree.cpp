@@ -733,8 +733,8 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
   _Link_type __z;
 
   // __y의 왼쪽자식 = __z
-  if (__y == _M_header || __x != 0 || 
-      _M_key_compare(_KeyOfValue()(__v), _S_key(__y))) {
+  if (__y == _M_header || __x != 0 ||  //(__x != 0는 필요한가? _M_header가 다 포괄할거 같습니다만...)
+      _M_key_compare(_KeyOfValue()(__v), _S_key(__y))) { 
     __z = _M_create_node(__v);
     _S_left(__y) = __z;               // also makes _M_leftmost() = __z 
                                       //    when __y == _M_header
@@ -766,8 +766,8 @@ typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator
 _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
   ::insert_equal(const _Value& __v)
 {
-  _Link_type __y = _M_header;
-  _Link_type __x = _M_root();
+  _Link_type __y = _M_header; // parent
+  _Link_type __x = _M_root(); // child
   while (__x != 0) {
     __y = __x;
     __x = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)) ? 
