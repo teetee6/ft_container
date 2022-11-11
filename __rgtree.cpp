@@ -163,7 +163,7 @@ class RedBlackTree {
       return;
     }
 
-    y = z;
+    y = z; //z는 사라져야 할 존재
     int y_original_color = y->color;
     if (z->left == TNULL) {
       x = z->right;
@@ -423,7 +423,7 @@ int main() {
   bst.insert(65);
   bst.insert(60);
   bst.insert(75);
-  bst.insert(57);
+  // bst.insert(57);
 
   bst.printTree();
   cout << endl
