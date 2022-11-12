@@ -946,7 +946,7 @@ _Rb_tree<_Key,_Val,_KoV,_Compare,_Alloc>
     while (__x != 0) {
       _Link_type __y = _M_clone_node(__x);
       __p->_M_left = __y;   // p는 항상 y의 부모다
-      __y->_M_parent = ;__p
+      __y->_M_parent = __p;
       if (__x->_M_right)
         __y->_M_right = _M_copy(_S_right(__x), __y);
       __p = __y;
