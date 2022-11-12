@@ -46,39 +46,38 @@ struct _Rb_tree_base_iterator
     void _M_increment()
     {
         if (_M_node->_M_right != 0) {
-        _M_node = _M_node->_M_right;
-        while (_M_node->_M_left != 0)
-            _M_node = _M_node->_M_left;
+            _M_node = _M_node->_M_right;
+            while (_M_node->_M_left != 0)
+                _M_node = _M_node->_M_left;
         }
         else {
-        _Base_ptr __y = _M_node->_M_parent;
-        while (_M_node == __y->_M_right) {
-            _M_node = __y;
-            __y = __y->_M_parent;
-        }
-        if (_M_node->_M_right != __y)
-            _M_node = __y;
+            _Base_ptr __y = _M_node->_M_parent;
+            while (_M_node == __y->_M_right) {
+                _M_node = __y;
+                __y = __y->_M_parent;
+            }
+            if (_M_node->_M_right != __y)   // special case
+                _M_node = __y;
         }
     }
 
     void _M_decrement()
     {
-        if (_M_node->_M_color == _S_rb_tree_red &&
-            _M_node->_M_parent->_M_parent == _M_node)
-        _M_node = _M_node->_M_right;
+        if (_M_node->_M_color == _S_rb_tree_red && _M_node->_M_parent->_M_parent == _M_node) // special case
+            _M_node = _M_node->_M_right;
         else if (_M_node->_M_left != 0) {
-        _Base_ptr __y = _M_node->_M_left;
-        while (__y->_M_right != 0)
-            __y = __y->_M_right;
-        _M_node = __y;
+            _Base_ptr __y = _M_node->_M_left;
+            while (__y->_M_right != 0)
+                __y = __y->_M_right;
+            _M_node = __y;
         }
         else {
-        _Base_ptr __y = _M_node->_M_parent;
-        while (_M_node == __y->_M_left) {
+            _Base_ptr __y = _M_node->_M_parent;
+            while (_M_node == __y->_M_left) {
+                _M_node = __y;
+                __y = __y->_M_parent;
+            }
             _M_node = __y;
-            __y = __y->_M_parent;
-        }
-        _M_node = __y;
         }
     }
 };
@@ -190,6 +189,7 @@ _Rb_tree_rotate_right(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root)
   __x->_M_parent = __y;
 }
 
+// Rebalance after insert
 inline void 
 _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) //(new_node, root)
 {
@@ -197,14 +197,14 @@ _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) //(new_
   while (__x != __root && __x->_M_parent->_M_color == _S_rb_tree_red) {
     if (__x->_M_parent == __x->_M_parent->_M_parent->_M_left) {
       _Rb_tree_node_base* __y = __x->_M_parent->_M_parent->_M_right;
-      if (__y && __y->_M_color == _S_rb_tree_red) {
+      if (__y && __y->_M_color == _S_rb_tree_red) { // parent==red, uncle==red (recoloring)
         __x->_M_parent->_M_color = _S_rb_tree_black;
         __y->_M_color = _S_rb_tree_black;
         __x->_M_parent->_M_parent->_M_color = _S_rb_tree_red;
         __x = __x->_M_parent->_M_parent;
       }
-      else {
-        if (__x == __x->_M_parent->_M_right) {
+      else {    // restructuring
+        if (__x == __x->_M_parent->_M_right) { // if k is right child, first left-rotate() about k's parent
           __x = __x->_M_parent;
           _Rb_tree_rotate_left(__x, __root);
         }
@@ -241,9 +241,11 @@ _Rb_tree_rebalance_for_erase(_Rb_tree_node_base* __z,
                              _Rb_tree_node_base*& __leftmost,
                              _Rb_tree_node_base*& __rightmost)
 {
-  _Rb_tree_node_base* __y = __z;
-  _Rb_tree_node_base* __x = 0;
-  _Rb_tree_node_base* __x_parent = 0;
+    /////////////// delete node and set ,according to the number of its child(0, 1, 2) handling ///////////////
+    // z = original_location
+  _Rb_tree_node_base* __y = __z; // z = delete node
+  _Rb_tree_node_base* __x = 0; // __x is replace node into replaced node's location. (and doubly-black node)
+  _Rb_tree_node_base* __x_parent = 0;   // doubly-black node's parent
   if (__y->_M_left == 0)     // __z has at most one non-null child. y == z.
     __x = __y->_M_right;     // __x might be null.
   else
@@ -255,7 +257,9 @@ _Rb_tree_rebalance_for_erase(_Rb_tree_node_base* __z,
         __y = __y->_M_left;
       __x = __y->_M_right;
     }
+  // y has two child
   if (__y != __z) {          // relink y in place of z.  y is z's successor
+    // y를 서브트리 루트로 올리는과정
     __z->_M_left->_M_parent = __y; 
     __y->_M_left = __z->_M_left;
     if (__y != __z->_M_right) {
@@ -274,11 +278,15 @@ _Rb_tree_rebalance_for_erase(_Rb_tree_node_base* __z,
     else 
       __z->_M_parent->_M_right = __y;
     __y->_M_parent = __z->_M_parent;
+    
     std::swap(__y->_M_color, __z->_M_color);
-    __y = __z;
+    __y = __z;  // y is not doubly-black or red-and-black. 이제 y를 삭제된 위치를 가리키게 하자.
     // __y now points to node to be actually deleted
   }
+  // y has zero or one child
   else {                        // __y == __z
+  // __x = replace node (just move up!)
+  // __y = delete node       
     __x_parent = __y->_M_parent;
     if (__x) __x->_M_parent = __y->_M_parent;   
     if (__root == __z)
@@ -301,11 +309,15 @@ _Rb_tree_rebalance_for_erase(_Rb_tree_node_base* __z,
       else                      // __x == __z->_M_left
         __rightmost = _Rb_tree_node_base::_S_maximum(__x);
   }
-  if (__y->_M_color != _S_rb_tree_red) { 
-    while (__x != __root && (__x == 0 || __x->_M_color == _S_rb_tree_black))
+
+    /////////////// doubly-black handling ///////////////
+  // x = doubly-black
+  if (__y->_M_color != _S_rb_tree_red) { // case1~4
+    while (__x != __root && (__x == 0 || __x->_M_color == _S_rb_tree_black))    // x is doubly-black
+    {
       if (__x == __x_parent->_M_left) {
         _Rb_tree_node_base* __w = __x_parent->_M_right;
-        if (__w->_M_color == _S_rb_tree_red) {
+        if (__w->_M_color == _S_rb_tree_red) {  // case1
           __w->_M_color = _S_rb_tree_black;
           __x_parent->_M_color = _S_rb_tree_red;
           _Rb_tree_rotate_left(__x_parent, __root);
@@ -314,19 +326,19 @@ _Rb_tree_rebalance_for_erase(_Rb_tree_node_base* __z,
         if ((__w->_M_left == 0 || 
              __w->_M_left->_M_color == _S_rb_tree_black) &&
             (__w->_M_right == 0 || 
-             __w->_M_right->_M_color == _S_rb_tree_black)) {
+             __w->_M_right->_M_color == _S_rb_tree_black)) { // case2
           __w->_M_color = _S_rb_tree_red;
           __x = __x_parent;
           __x_parent = __x_parent->_M_parent;
-        } else {
+        } else {  // entering here means that w is black, and its childs are not black, either.
           if (__w->_M_right == 0 || 
-              __w->_M_right->_M_color == _S_rb_tree_black) {
+              __w->_M_right->_M_color == _S_rb_tree_black) {    // case3
             if (__w->_M_left) __w->_M_left->_M_color = _S_rb_tree_black;
             __w->_M_color = _S_rb_tree_red;
             _Rb_tree_rotate_right(__w, __root);
             __w = __x_parent->_M_right;
           }
-          __w->_M_color = __x_parent->_M_color;
+          __w->_M_color = __x_parent->_M_color; // case4
           __x_parent->_M_color = _S_rb_tree_black;
           if (__w->_M_right) __w->_M_right->_M_color = _S_rb_tree_black;
           _Rb_tree_rotate_left(__x_parent, __root);
@@ -362,6 +374,7 @@ _Rb_tree_rebalance_for_erase(_Rb_tree_node_base* __z,
           break;
         }
       }
+    }
     if (__x) __x->_M_color = _S_rb_tree_black;
   }
   return __y;
@@ -489,9 +502,9 @@ protected:
   size_type _M_node_count; // keeps track of size of tree
   _Compare _M_key_compare;
 
-  _Link_type& _M_root() const   { return (_Link_type&) _M_header->_M_parent; }
-  _Link_type& _M_leftmost() const   { return (_Link_type&) _M_header->_M_left; }
-  _Link_type& _M_rightmost() const  { return (_Link_type&) _M_header->_M_right; }
+  _Link_type& _M_root() const   { return (_Link_type&) _M_header->_M_parent; } //cache
+  _Link_type& _M_leftmost() const   { return (_Link_type&) _M_header->_M_left; } //cache
+  _Link_type& _M_rightmost() const  { return (_Link_type&) _M_header->_M_right; } //cache
 
   static _Link_type& _S_left(_Link_type __x)    { return (_Link_type&)(__x->_M_left); }
   static _Link_type& _S_right(_Link_type __x)   { return (_Link_type&)(__x->_M_right); }
@@ -556,6 +569,7 @@ public:
   operator=(const _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& __x);
 
 private:
+// m_header (cache) 셋팅
   void _M_empty_initialize() {
     _S_color(_M_header) = _S_rb_tree_red; // used to distinguish header from 
                                           // __root, in iterator.operator++
@@ -916,22 +930,23 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::erase(const _Key& __x)
 template <class _Key, class _Val, class _KoV, class _Compare, class _Alloc>
 typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::_Link_type 
 _Rb_tree<_Key,_Val,_KoV,_Compare,_Alloc>
-  ::_M_copy(_Link_type __x, _Link_type __p)
+  ::_M_copy(_Link_type __x, _Link_type __p) //  _M_root() = _M_copy(__x._M_root(), _M_header); // _M_header에 연동도 해주시고, M_root도 반환해주세요?
 {
                         // structural copy.  __x and __p must be non-null.
+                        // x노드 하나씩 내려가면서 계속 clone함.
   _Link_type __top = _M_clone_node(__x);
-  __top->_M_parent = __p;
+  __top->_M_parent = __p; // _M_header 주소값을 넣어줌
  
   __STL_TRY {
     if (__x->_M_right)
-      __top->_M_right = _M_copy(_S_right(__x), __top);
+      __top->_M_right = _M_copy(_S_right(__x), __top); // 오른쪽에 대한건 위탁. _M_copy()자체는 왼쪽으로 쭈욱 내려가는형태.
     __p = __top;
     __x = _S_left(__x);
 
     while (__x != 0) {
       _Link_type __y = _M_clone_node(__x);
-      __p->_M_left = __y;
-      __y->_M_parent = __p;
+      __p->_M_left = __y;   // p는 항상 y의 부모다
+      __y->_M_parent = ;__p
       if (__x->_M_right)
         __y->_M_right = _M_copy(_S_right(__x), __y);
       __p = __y;
@@ -940,6 +955,7 @@ _Rb_tree<_Key,_Val,_KoV,_Compare,_Alloc>
   }
   __STL_UNWIND(_M_erase(__top));
 
+    // __x에 대한 복사본(복사된 노드들의 트리)를 반환
   return __top;
 }
 
