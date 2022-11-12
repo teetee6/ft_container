@@ -727,7 +727,7 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
       _M_rightmost() = _M_header;
     }
     else {
-      _M_root() = _M_copy(__x._M_root(), _M_header);
+      _M_root() = _M_copy(__x._M_root(), _M_header); // 모든 노드를 (우측 노드부터->좌측 노드로) 복사해주는거에 지나지 않는다. // _M_header->parent = _M_header 가 여기서 설정된다
       _M_leftmost() = _S_minimum(_M_root());
       _M_rightmost() = _S_maximum(_M_root());
       _M_node_count = __x._M_node_count;
@@ -930,12 +930,13 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::erase(const _Key& __x)
 template <class _Key, class _Val, class _KoV, class _Compare, class _Alloc>
 typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::_Link_type 
 _Rb_tree<_Key,_Val,_KoV,_Compare,_Alloc>
-  ::_M_copy(_Link_type __x, _Link_type __p) //  _M_root() = _M_copy(__x._M_root(), _M_header); // _M_header에 연동도 해주시고, M_root도 반환해주세요?
+  ::_M_copy(_Link_type __x, _Link_type __p) //  _M_root() = _M_copy(__x._M_root(), _M_header); 
+  // M_copy()밖에서 _M_header->M_Left 같은 자식설정 해주니, 이 함수 내에서 M_header를 부모로 설정하는작업을 해달라는 거임
 {
                         // structural copy.  __x and __p must be non-null.
                         // x노드 하나씩 내려가면서 계속 clone함.
   _Link_type __top = _M_clone_node(__x);
-  __top->_M_parent = __p; // _M_header 주소값을 넣어줌
+  __top->_M_parent = __p; // _M_header 주소값을 넣어줌 (위에서 말한 M_header를 부모로 설정해주는작업)
  
   __STL_TRY {
     if (__x->_M_right)
