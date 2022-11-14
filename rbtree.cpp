@@ -539,7 +539,7 @@ private:
 public:
                                 // allocation/deallocation
   _Rb_tree()
-    : _Base(allocator_type()), _M_node_count(0), _M_key_compare()
+    : _Base(allocator_type()), _M_node_count(0), _M_key_compare() // _Base()이거할때 _M_header노드 하나 달랑 만들어짐
     { _M_empty_initialize(); }
 
   _Rb_tree(const _Compare& __comp)
@@ -573,9 +573,9 @@ private:
   void _M_empty_initialize() {
     _S_color(_M_header) = _S_rb_tree_red; // used to distinguish header from 
                                           // __root, in iterator.operator++
-    _M_root() = 0;
-    _M_leftmost() = _M_header;
-    _M_rightmost() = _M_header;
+    _M_root() = 0;  // m_header->parent 설정임. m_header그 자체는 아무값 없음
+    _M_leftmost() = _M_header;  // m_header->left
+    _M_rightmost() = _M_header; // m_header->right
   }
 
 public:    
@@ -622,7 +622,7 @@ public:
   void erase(const key_type* __first, const key_type* __last);
   void clear() {
     if (_M_node_count != 0) {
-      _M_erase(_M_root());
+      _M_erase(_M_root()); // 메모리 싹 지움
       _M_leftmost() = _M_header;
       _M_root() = 0;
       _M_rightmost() = _M_header;
@@ -740,15 +740,15 @@ template <class _Key, class _Value, class _KeyOfValue,
           class _Compare, class _Alloc>
 typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator
 _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::_M_insert(_Base_ptr __x_, _Base_ptr __y_, const _Value& __v)
+  ::_M_insert(_Base_ptr __x_, _Base_ptr __y_, const _Value& __v) // y는 부모, x는 자식
 {
-  _Link_type __x = (_Link_type) __x_; // __x는 NULL노드 or 실제노드
-  _Link_type __y = (_Link_type) __y_;
+  _Link_type __x = (_Link_type) __x_; // __x는 NIL노드
+  _Link_type __y = (_Link_type) __y_; // y는 x의 부모
   _Link_type __z;
 
+  //(__x != 0는 필요한가? _M_header가 다 포괄할거 같습니다만...) ==> 필요함 x==0일때 end()갱신하는 호출있음
   // __y의 왼쪽자식 = __z
-  if (__y == _M_header || __x != 0 ||  //(__x != 0는 필요한가? _M_header가 다 포괄할거 같습니다만...)
-      _M_key_compare(_KeyOfValue()(__v), _S_key(__y))) { 
+  if (__y == _M_header || __x != 0 || _M_key_compare(_KeyOfValue()(__v), _S_key(__y))) {  //새로운 노드는 y의 왼쪽자식이다
     __z = _M_create_node(__v);
     _S_left(__y) = __z;               // also makes _M_leftmost() = __z 
                                       //    when __y == _M_header
@@ -778,13 +778,13 @@ template <class _Key, class _Value, class _KeyOfValue,
           class _Compare, class _Alloc>
 typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator
 _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::insert_equal(const _Value& __v)
+  ::insert_equal(const _Value& __v) 
 {
   _Link_type __y = _M_header; // parent
-  _Link_type __x = _M_root(); // child
+  _Link_type __x = _M_root(); // child (적절한 위치인 맨 끝노드까지 파고 내려감)(최종적으로 NIL가 될거임)
   while (__x != 0) {
     __y = __x;
-    __x = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)) ? 
+    __x = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)) ?  // v < x
             _S_left(__x) : _S_right(__x);
   }
   return _M_insert(__x, __y, __v);
@@ -803,20 +803,19 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
   bool __comp = true;
   while (__x != 0) {
     __y = __x;
-    __comp = _M_key_compare(_KeyOfValue()(__v), _S_key(__x));
+    __comp = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)); // v < x
     __x = __comp ? _S_left(__x) : _S_right(__x);
   }
-  iterator __j = iterator(__y);   
-  if (__comp)
-    if (__j == begin())     
+  iterator __j = iterator(__y);
+  if (__comp) // 왼쪽자식
+    if (__j == begin()) // leftMost 라면
       return pair<iterator,bool>(_M_insert(__x, __y, __v), true);
     else
-      --__j;
-  if (_M_key_compare(_S_key(__j._M_node), _KeyOfValue()(__v)))
+      --__j;  // unique인지 확인하는 용임
+  if (_M_key_compare(_S_key(__j._M_node), _KeyOfValue()(__v)))  // v보다 이터낮은건 v보다 작은 값일때만 넣겠다
     return pair<iterator,bool>(_M_insert(__x, __y, __v), true);
-  return pair<iterator,bool>(__j, false);
+  return pair<iterator,bool>(__j, false); // 동일한 값이면 넣지 않겠다
 }
-
 
 template <class _Key, class _Val, class _KeyOfValue, 
           class _Compare, class _Alloc>
@@ -824,27 +823,28 @@ typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>
   ::insert_unique(iterator __position, const _Val& __v)
 {
+  // root노드부터 탐색하지 않고, 바로 넣을수 있다면 바로넣겠다.(캐싱)
   if (__position._M_node == _M_header->_M_left) { // begin()
     if (size() > 0 && 
-       _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node)))
-      return _M_insert(__position._M_node, __position._M_node, __v);
+       _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node)))  // __v < leftMost();
+      return _M_insert(__position._M_node, __position._M_node, __v);  // __position 자식으로 __v 노드 새로 만들어줌 (왼쪽으로 넣어지니 position위치에 v넣은 의미가 와닿음)
     // first argument just needs to be non-null 
-    else
-      return insert_unique(__v).first;
+    else  // __position == end()
+      return insert_unique(__v).first;  // 적당한곳 찾아가서 넣어짐(비어있을때, ==이 나올수 있어서 애매한 경우는 다 이쪽) (사실 왼쪽으로 넣으나 오른쪽으로 넣으나 그게 조정되서 position위치로 가리켜질것임)
   } else if (__position._M_node == _M_header) { // end()
-    if (_M_key_compare(_S_key(_M_rightmost()), _KeyOfValue()(__v)))
+    if (_M_key_compare(_S_key(_M_rightmost()), _KeyOfValue()(__v))) // rightMost() < __v;
       return _M_insert(0, _M_rightmost(), __v);
     else
       return insert_unique(__v).first;
   } else {
     iterator __before = __position;
     --__before;
-    if (_M_key_compare(_S_key(__before._M_node), _KeyOfValue()(__v)) 
+    if (_M_key_compare(_S_key(__before._M_node), _KeyOfValue()(__v)) // before < v < position
         && _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node))) {
-      if (_S_right(__before._M_node) == 0)
-        return _M_insert(0, __before._M_node, __v); 
-      else
-        return _M_insert(__position._M_node, __position._M_node, __v);
+      if (_S_right(__before._M_node) == 0)  // before의 rChild가 없으면, 거기에 넣으면 position이니까 바로 넣는다
+        return _M_insert(0, __before._M_node, __v); //right child
+      else  // before가 rChild를 갖는다는것은, position이 lChild가 없다는것이다(그림으로 봐야 이해됨)
+        return _M_insert(__position._M_node, __position._M_node, __v); //left child
     // first argument just needs to be non-null 
     } else
       return insert_unique(__v).first;
@@ -859,20 +859,20 @@ _Rb_tree<_Key,_Val,_KeyOfValue,_Compare,_Alloc>
 {
   if (__position._M_node == _M_header->_M_left) { // begin()
     if (size() > 0 && 
-    !_M_key_compare(_S_key(__position._M_node), _KeyOfValue()(__v)))
+    !_M_key_compare(_S_key(__position._M_node), _KeyOfValue()(__v)))  // v <= m_node
       return _M_insert(__position._M_node, __position._M_node, __v);
     // first argument just needs to be non-null 
     else
       return insert_equal(__v);
   } else if (__position._M_node == _M_header) {// end()
-    if (!_M_key_compare(_KeyOfValue()(__v), _S_key(_M_rightmost())))
+    if (!_M_key_compare(_KeyOfValue()(__v), _S_key(_M_rightmost())))  // v >= rightMose()
       return _M_insert(0, _M_rightmost(), __v);
     else
       return insert_equal(__v);
   } else {
     iterator __before = __position;
     --__before;
-    if (!_M_key_compare(_KeyOfValue()(__v), _S_key(__before._M_node))
+    if (!_M_key_compare(_KeyOfValue()(__v), _S_key(__before._M_node)) // before <= v <= position
         && !_M_key_compare(_S_key(__position._M_node), _KeyOfValue()(__v))) {
       if (_S_right(__before._M_node) == 0)
         return _M_insert(0, __before._M_node, __v); 
@@ -963,10 +963,10 @@ _Rb_tree<_Key,_Val,_KoV,_Compare,_Alloc>
 template <class _Key, class _Value, class _KeyOfValue, 
           class _Compare, class _Alloc>
 void _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::_M_erase(_Link_type __x)
+  ::_M_erase(_Link_type __x)  // 우측 리프->좌측 리프로 휩쓸어버리기~
 {
                                 // erase without rebalancing
-  while (__x != 0) {
+  while (__x != 0) {  // 왼쪽으로 찔끔찔끔 간당
     _M_erase(_S_right(__x));
     _Link_type __y = _S_left(__x);
     destroy_node(__x);
@@ -1002,13 +1002,13 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::find(const _Key& __k)
   _Link_type __x = _M_root();      // Current node. 
 
   while (__x != 0) 
-    if (!_M_key_compare(_S_key(__x), __k))
+    if (!_M_key_compare(_S_key(__x), __k))  // x >= k
       __y = __x, __x = _S_left(__x);
-    else
+    else  // x < k
       __x = _S_right(__x);
 
   iterator __j = iterator(__y);   
-  return (__j == end() || _M_key_compare(__k, _S_key(__j._M_node))) ? 
+  return (__j == end() || _M_key_compare(__k, _S_key(__j._M_node))) ? //못찾았거나 || k(15) < j(18) 이면 못찾은것임 
      end() : __j;
 }
 
@@ -1071,9 +1071,9 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
   _Link_type __x = _M_root(); /* Current node. */
 
   while (__x != 0) 
-    if (!_M_key_compare(_S_key(__x), __k))
+    if (!_M_key_compare(_S_key(__x), __k)) // x >= k
       __y = __x, __x = _S_left(__x);
-    else
+    else  // x < k
       __x = _S_right(__x);
 
   return const_iterator(__y);
@@ -1089,9 +1089,9 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
   _Link_type __x = _M_root(); /* Current node. */
 
    while (__x != 0) 
-     if (_M_key_compare(__k, _S_key(__x)))
+     if (_M_key_compare(__k, _S_key(__x))) // k < x
        __y = __x, __x = _S_left(__x);
-     else
+     else // k >= x
        __x = _S_right(__x);
 
    return iterator(__y);

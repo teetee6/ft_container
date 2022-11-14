@@ -88,7 +88,7 @@ pair<_T1,_T2> make_pair(_T1 __x, _T2 __y)
 
 // distance로 바꿀까?
 template < class InputIterator >
-typename ft::iterator_traits< InputIterator >::difference_type difference(InputIterator first, InputIterator last) {
+typename ft::iterator_traits< InputIterator >::difference_type distance(InputIterator first, InputIterator last) {
   typedef typename ft::iterator_traits< InputIterator >::difference_type size_type;
   size_type n = 0;
   

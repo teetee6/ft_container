@@ -53,7 +53,7 @@ public:
 			const allocator_type& alloc = allocator_type(),
 			typename ft::enable_if<!ft::is_integral<_InputIterator >::value >::type* = NULL) // is_integral<false>일때만 진입함
 		: __alloc(alloc) {
-		size_type n = ft::difference(__first, __last);
+		size_type n = ft::distance(__first, __last);
 		this->__begin_ = this->__end_ = this->__alloc.allocate(n);
 		this->__end_cap_ = this->__begin_ + n;
 		while (__first != __last) this->__alloc.construct(this->__end_++, *__first++);
@@ -194,7 +194,7 @@ public:
     template <class _InputIterator>
     void assign(_InputIterator __first, _InputIterator __last, 
 			typename ft::enable_if<!ft::is_integral< _InputIterator >::value >::type* = NULL) {
-		size_type __new_size = static_cast<size_type>(ft::difference(__first, __last));
+		size_type __new_size = static_cast<size_type>(ft::distance(__first, __last));
 		if (__new_size <= capacity()) // just destroy and construct
 		{
 			this->clear();
@@ -276,7 +276,7 @@ public:
     template <class _InputIterator>
 	void insert(iterator __position, _InputIterator __first, _InputIterator __last,
 		typename ft::enable_if<!ft::is_integral< _InputIterator >::value >::type* = NULL) {
-		size_type __n = ft::difference(__first, __last);
+		size_type __n = ft::distance(__first, __last);
 		if (__n > 0)
 		{
 			pointer __p = this->__begin_ + (__position - begin());
@@ -326,7 +326,7 @@ public:
 		return (erase(__position, __position + 1));
 	}
     iterator erase(iterator __first, iterator __last) {
-		size_type __n = ft::difference(__first, __last);
+		size_type __n = ft::distance(__first, __last);
 		pointer __iter, __ret_iter;
 		__iter = __ret_iter = this->__begin_ + (__first - begin());
 		pointer __p = this->__end_;
