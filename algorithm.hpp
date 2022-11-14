@@ -51,6 +51,15 @@ bool equal(_InputIterator1 first1, _InputIterator1 last1, _InputIterator2 first2
   return true;
 }
 
+template <typename T>
+void swap(T& lhs, T& rhs)
+{
+    T tmp;
+    tmp = lhs;
+    lhs = rhs;
+    rhs = tmp;
+}
+
 }
 
 #endif

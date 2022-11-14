@@ -62,4 +62,9 @@ int main()
     std::cout << ft::equal(vec1.begin(), vec1.end(), vec6.begin(), eq) << std::endl;
     std::cout << "[" << ft::equal(vec1.begin(), vec1.end(), vec6.begin()) << "]" << std::endl;
     std::cout << std::endl;
+
+    std::cout << "---------------------------------------------------------------------" <<std::endl;
+    int a = 3, b= 42;
+    ft::swap(a, b);
+    std::cout << a << ", " << b << std::endl;
 }
