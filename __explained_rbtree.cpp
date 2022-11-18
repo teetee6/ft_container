@@ -56,14 +56,14 @@ struct _Rb_tree_base_iterator
                 _M_node = __y;
                 __y = __y->_M_parent;
             }
-            if (_M_node->_M_right != __y)   // special case
+            if (_M_node->_M_right != __y)   // if 1 size(and _M_node == root), then _M_node = end();
                 _M_node = __y;
         }
     }
 
     void _M_decrement()
     {
-        if (_M_node->_M_color == _S_rb_tree_red && _M_node->_M_parent->_M_parent == _M_node) // special case
+        if (_M_node->_M_color == _S_rb_tree_red && _M_node->_M_parent->_M_parent == _M_node) // if _M_node == end(), then _M_node = end() - 1;
             _M_node = _M_node->_M_right;
         else if (_M_node->_M_left != 0) {
             _Base_ptr __y = _M_node->_M_left;
@@ -791,12 +791,9 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
 }
 
 
-template <class _Key, class _Value, class _KeyOfValue, 
-          class _Compare, class _Alloc>
-std::pair<typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator, 
-     bool>
-_Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::insert_unique(const _Value& __v)
+template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+std::pair<typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator, bool>
+_Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::insert_unique(const _Value& __v)
 {
   _Link_type __y = _M_header;
   _Link_type __x = _M_root();
