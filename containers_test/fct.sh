@@ -38,10 +38,10 @@ ${EOC}"
 
 compile () {
 	# 1=file 2=define used {ft/std} 3=output_file 4?=compile_log
-	macro_name=$(echo "USING_${2}" | awk '{ print toupper($0) }')
+	macro_name=$(echo "USING_${2}" | awk '{ print toupper($0) }')	# USING_STD or USING_FT
 	compile_cmd="$CC $CFLAGS -o ${3} -I./$include_path -D ${macro_name} ${1}"
-	if [ -n "$4" ]; then
-		compile_cmd+=" &>${4}"
+	if [ -n "$4" ]; then	# "$4"에 뭔가가 지정되어 있다면 true
+		compile_cmd+=" &>${4}"	# stdout, stderr 를 /dev/null로 (https://stackoverflow.com/questions/24793069/what-does-do-in-bash)
 	fi
 	eval "${compile_cmd}"
 	return $?
@@ -79,19 +79,19 @@ printRes () {
 # Else, diff is something really important, return 1 -> error
 compare_output () {
 	# 1=diff_file
-	if ! [ -s $1 ]; then
-		return 0
+	if ! [ -s $1 ]; then	# -s : true if not empty file
+		return 0	# empty file!
 	fi
-	regex=$(cat <<- EOF
+	# <<-의 -는 왜있는지 모르겟넹~ 무시되는거 같음
+	regex=$(cat <<- EOF			
 	^[0-9]*c[0-9]*
 	< max_size: [0-9]*
 	---
 	> max_size: [0-9]*$
 	EOF
 	)
-
-	cat $1 | grep -v -E -q "$regex"
-	[ "$?" -eq "0" ] && return 1 || return 2;
+	cat $1 | grep -v -E -q "$regex"	# 그 패턴에 속하지 않는것, egrep으로 확장해 쓰겠다, 출력않고 조용이 실행
+	[ "$?" -eq "0" ] && return 1 || return 2;	# 뭔가 찾았다는건 diff가 남아있다는 거(1), 그게아님 max_size차이(2)
 }
 
 isEq () {
@@ -117,8 +117,9 @@ cmp_one () {
 	}
 
 	# Launch async compilations for ft/std binaries
-	compile "$1" "ft"  "$ft_bin"  $ft_compile_output & ft_pid=$!;
-	compile "$1" "std" "$std_bin" $std_compile_output & std_pid=$!;
+	# echo $!
+	compile "$1" "ft"  "$ft_bin"  $ft_compile_output & ft_pid=$!;	 # $! : 마지막으로 실행한 백그라운드 프로세스 ID
+	compile "$1" "std" "$std_bin" $std_compile_output & std_pid=$!;		# & - 앞의 명령어를 백그라운드로 돌리고 동시에 뒤의 명령어를 실행
 
 	wait ${ft_pid}; ft_ret=$?;
 	wait ${std_pid}; std_ret=$?;
