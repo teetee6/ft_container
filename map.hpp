@@ -1,5 +1,5 @@
 #ifndef _STL_MAP_H
-#define _STL_MAP_H 1
+#define _STL_MAP_H
 
 #include "function_base.hpp" 
 #include "rbtree.hpp"
@@ -60,11 +60,11 @@ namespace ft
 
       // N(linear) if already sorted, otherwise NlogN
       template<typename _InputIterator> 
-      map(_InputIterator __first, _InputIterator __last) : _M_t()   { _M_t._M_insert_unique(__first, __last); }
+      map(_InputIterator __first, _InputIterator __last) : _M_t()   { _M_t.insert_unique(__first, __last); }
 
       template<typename _InputIterator>
       map(_InputIterator __first, _InputIterator __last, const _Compare& __comp, const allocator_type& __a = allocator_type())
-        : _M_t(__comp, __a) { _M_t._M_insert_unique(__first, __last); }
+        : _M_t(__comp, __a) { _M_t.insert_unique(__first, __last); }
 
       allocator_type  get_allocator() const { return _M_t.get_allocator(); }
 
@@ -111,11 +111,11 @@ namespace ft
         return (*__i).second;
       }
 
-      ft::pair<iterator, bool> insert(const value_type& __x)  { return _M_t._M_insert_unique(__x); }
-      iterator insert(iterator __position, const value_type& __x)   { return _M_t._M_insert_unique_(__position, __x); }
+      ft::pair<iterator, bool> insert(const value_type& __x)  { return _M_t.insert_unique(__x); }
+      iterator insert(iterator __position, const value_type& __x)   { return _M_t.insert_unique(__position, __x); }
 
       template<typename _InputIterator>
-      void insert(_InputIterator __first, _InputIterator __last)    { _M_t._M_insert_unique(__first, __last); }
+      void insert(_InputIterator __first, _InputIterator __last)    { _M_t.insert_unique(__first, __last); }
 
       void erase(iterator __position)   { _M_t.erase(__position); }
       size_type erase(const key_type& __x)  { return _M_t.erase(__x); }
@@ -196,8 +196,8 @@ namespace ft
 
 #endif /* _STL_MAP_H */
 
-int main() {
+// int main() {
   
 
-  return 0;
-}
+//   return 0;
+// }

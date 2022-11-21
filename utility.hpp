@@ -14,7 +14,7 @@ struct pair
     _T1 first;
     _T2 second;
 
-    pair(const pair& __p) {  first = __p.first; second = __p.second; }
+    pair(const pair& __p) : first(__p.first), second(__p.second) { }
     pair() : first(), second() {}
     pair(_T1 const& __t1, _T2 const& __t2) : first(__t1), second(__t2) {}
 

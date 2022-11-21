@@ -88,7 +88,10 @@ struct _Rb_tree_iterator
 
     void _M_increment()
     {
-        // if 0 size, then infinite loop?
+        // prevent ++end() from being stucked in infinite loop in case of the container's size 0
+        if (_M_node->_M_right == _M_node )
+          return ;
+        
         if (_M_node->_M_right != 0) {
             _M_node = _M_node->_M_right;
             while (_M_node->_M_left != 0)
@@ -398,36 +401,37 @@ inline _Rb_tree_node_base* _Rb_tree_erase_fix(
 }
 
 
-template <class _Tp, class _Alloc>
-class _Rb_tree_base
-{
-public:
-  typedef _Alloc                                allocator_type;
-  allocator_type get_allocator() const          { return _M_node_allocator; }
-  _Rb_tree_base(const allocator_type& __a) : _M_node_allocator(__a), _M_header(0) {
-    _M_header = _M_get_node();
-  }
-  ~_Rb_tree_base()                              { _M_put_node(_M_header); }
+// template <class _Tp, class _Alloc>
+// class _Rb_tree_base
+// {
+// public:
+//   typedef _Alloc                                allocator_type;
+//   allocator_type get_allocator() const          { return _M_node_allocator; }
+//   _Rb_tree_base(const allocator_type& __a) : _M_node_allocator(__a), _M_header(0) {
+//     _M_header = _M_get_node();
+//   }
+//   ~_Rb_tree_base()                              { _M_put_node(_M_header); }
 
-protected:
-  allocator_type        _M_node_allocator;
-  _Rb_tree_node<_Tp>*   _M_header;      // caching node. ->left is leftMost(), ->right is rightMost(), ->parent is root()
+// protected:
+//   allocator_type        _M_node_allocator;
+//   _Rb_tree_node<_Tp>*   _M_header;      // caching node. ->left is leftMost(), ->right is rightMost(), ->parent is root()
 
-  _Rb_tree_node<_Tp>* _M_get_node()         { return _M_node_allocator.allocate(1); }
-  void _M_put_node(_Rb_tree_node<_Tp>* __p) { _M_node_allocator.deallocate(__p, 1); }
-};
+//   _Rb_tree_node<_Tp>* _M_get_node()         { return _M_node_allocator.allocate(1); }
+//   void _M_put_node(_Rb_tree_node<_Tp>* __p) { _M_node_allocator.deallocate(__p, 1); }
+// };
 
 
 template <class _Key, class _Value, class _KeyOfValue, class _Compare,
           class _Alloc = std::allocator<_Value> >
-class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc> {
-private:
-  typedef _Rb_tree_base<_Value, _Alloc> _Base;
+class _Rb_tree {
+// private:
+  // typedef _Rb_tree_base<_Value, _Alloc> _Base;
 protected:
   typedef _Rb_tree_node_base* _Base_ptr;
   typedef _Rb_tree_node<_Value> _Rb_tree_node;
   typedef _Rb_tree_Color_type _Color_type;
 public:
+  typedef _Alloc                                allocator_type;
   typedef _Key key_type;
   typedef _Value value_type;
   typedef value_type* pointer;
@@ -438,19 +442,50 @@ public:
   typedef size_t size_type;
   typedef ptrdiff_t difference_type;
 
-  typedef typename _Base::allocator_type allocator_type;
-  allocator_type get_allocator() const { return _Base::get_allocator(); }
+  // allocator_type get_allocator() const { return _Base::get_allocator(); }
+  // allocator_type get_allocator() const { return _M_node_allocator; }
+
+// protected:
+//   // typename _Base::_M_get_node  _M_get_node;
+//   // typename _Base::_M_put_node  _M_put_node;
+//   // typename _Base::_M_header    _M_header;
+//   allocator_type  _M_node_allocator;
+//   _Rb_tree_node<_Tp>* _M_get_node()         { return _M_node_allocator.allocate(1); }
+//   void _M_put_node(_Rb_tree_node<_Tp>* __p) { _M_node_allocator.deallocate(__p, 1); }
 
 protected:
-  typename _Base::_M_get_node  _M_get_node;
-  typename _Base::_M_put_node  _M_put_node;
-  typename _Base::_M_header    _M_header;
+  typedef typename _Alloc::template rebind<_Rb_tree_node>::other _node_alloc_type;
+  _node_alloc_type        _M_node_allocator;  // _Rb_tree_node
+  allocator_type          __value_allocator;  // ft::pair
+
+  // caching node. ->left is leftMost(), ->right is rightMost(), ->parent is root()
+  _Rb_tree_node*   _M_header;
+
+  // 'ft::_Rb_tree<int, ft::pair<const int, std::__1::basic_string<char> >, ft::_Select1st<ft::pair<const int,
+  //     std::__1::basic_string<char> > >, ft::less<int>, std::__1::allocator<ft::pair<const int, std::__1::basic_string<char> > > >::_Rb_tree_node *' 
+  //     (aka
+  //     '_Rb_tree_node<ft::pair<const int, std::__1::basic_string<char> > > *'
+
+  // 'std::__1::allocator<ft::pair<const int, std::__1::basic_string<char> > >::pointer' (aka 'ft::pair<const int, std::__1::basic_string<char> > *'
+
+  _Rb_tree_node* _M_get_node()         { return _M_node_allocator.allocate(1); }
+  void _M_put_node(_Rb_tree_node* __p) { _M_node_allocator.deallocate(__p, 1); }
+
+public:
+  _node_alloc_type get_allocator() const          { return _M_node_allocator; }
+  // _Rb_tree_base(const allocator_type& __a) : _M_node_allocator(__a), _M_header(0) {
+  //   _M_header = _M_get_node();
+  // }
+  // ~_Rb_tree_base()                              { _M_put_node(_M_header); }
+
+
 
 protected:
   _Link_type _M_create_node(const value_type& __x)
   {
     _Link_type __tmp = _M_get_node();
-    construct(&__tmp->_M_value_field, __x);
+    // typename _Alloc::template rebind<_Rb_tree_node<value_type> >::other
+    __value_allocator.construct(&__tmp->_M_value_field, __x);
     return __tmp;
   }
 
@@ -465,7 +500,7 @@ protected:
 
   void destroy_node(_Link_type __p)
   {
-    destroy(&__p->_M_value_field);
+    __value_allocator.destroy(&__p->_M_value_field);
     _M_put_node(__p);
   }
 
@@ -473,20 +508,20 @@ protected:
   size_type _M_node_count; // the size of tree
   _Compare _M_key_compare;
 
-  _Link_type& _M_root() const                   { return static_cast<_Link_type&>(_M_header->_M_parent); } //cache (check if static_cast<_Link_type&> works well!!!!!!!!!!!)
-  _Link_type& _M_leftmost() const               { return static_cast<_Link_type&>(_M_header->_M_left); } //cache
-  _Link_type& _M_rightmost() const              { return static_cast<_Link_type&>(_M_header->_M_right); } //cache
+  _Link_type& _M_root() const                   { return (_Link_type&)(_M_header->_M_parent); } //cache
+  _Link_type& _M_leftmost() const               { return (_Link_type&)(_M_header->_M_left); } //cache
+  _Link_type& _M_rightmost() const              { return (_Link_type&)(_M_header->_M_right); } //cache
 
-  static _Link_type& _S_left(_Link_type __x)    { return static_cast<_Link_type&>(__x->_M_left); }
-  static _Link_type& _S_right(_Link_type __x)   { return static_cast<_Link_type&>(__x->_M_right); }
-  static _Link_type& _S_parent(_Link_type __x)  { return static_cast<_Link_type&>(__x->_M_parent); }
+  static _Link_type& _S_left(_Link_type __x)    { return (_Link_type&)(__x->_M_left); }
+  static _Link_type& _S_right(_Link_type __x)   { return (_Link_type&)(__x->_M_right); }
+  static _Link_type& _S_parent(_Link_type __x)  { return (_Link_type&)(__x->_M_parent); }
   static reference _S_value(_Link_type __x)     { return __x->_M_value_field; }
   static const _Key& _S_key(_Link_type __x)     { return _KeyOfValue()(_S_value(__x)); }
   static _Color_type& _S_color(_Link_type __x)  { return static_cast<_Color_type&>(__x->_M_color); }
 
-  static _Link_type& _S_left(_Base_ptr __x)     { return static_cast<_Link_type&>(__x->_M_left); }
-  static _Link_type& _S_right(_Base_ptr __x)    { return static_cast<_Link_type&>(__x->_M_right); }
-  static _Link_type& _S_parent(_Base_ptr __x)   { return static_cast<_Link_type&>(__x->_M_parent); }
+  static _Link_type& _S_left(_Base_ptr __x)     { return (_Link_type&)(__x->_M_left); }
+  static _Link_type& _S_right(_Base_ptr __x)    { return (_Link_type&)(__x->_M_right); }
+  static _Link_type& _S_parent(_Base_ptr __x)   { return (_Link_type&)(__x->_M_parent); }
   static reference _S_value(_Base_ptr __x)      { return (static_cast<_Link_type>(__x))->_M_value_field; }
   static const _Key& _S_key(_Base_ptr __x)      { return _KeyOfValue()(_S_value(static_cast<_Link_type>(__x)));} 
   static _Color_type& _S_color(_Base_ptr __x)   { return static_cast<_Color_type&>(_Link_type(__x)->_M_color); }
@@ -509,21 +544,30 @@ public:
 
 // allocation/deallocation
   _Rb_tree()
-    : _Base(allocator_type()), _M_node_count(0), _M_key_compare() // kickstart! just make one node(_M_header)
-    { _M_empty_initialize(); }
+    : _M_node_allocator(allocator_type()), _M_header(0), _M_node_count(0), _M_key_compare() // kickstart! just make one node(_M_header)
+    { 
+      _M_header = _M_get_node();
+      _M_empty_initialize(); 
+    }
 
   _Rb_tree(const _Compare& __comp)
-    : _Base(allocator_type()), _M_node_count(0), _M_key_compare(__comp) 
-    { _M_empty_initialize(); }
+    : _M_node_allocator(allocator_type()), _M_header(0), _M_node_count(0), _M_key_compare(__comp) 
+    { 
+      _M_header = _M_get_node();
+      _M_empty_initialize(); 
+    }
 
   _Rb_tree(const _Compare& __comp, const allocator_type& __a)
-    : _Base(__a), _M_node_count(0), _M_key_compare(__comp) 
-    { _M_empty_initialize(); }
+    : _M_node_allocator(__a), _M_header(0), _M_node_count(0), _M_key_compare(__comp) 
+    { 
+      _M_header = _M_get_node();
+      _M_empty_initialize(); 
+    }
 
   _Rb_tree(const _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& __x) 
-    : _Base(__x.get_allocator()),
-      _M_node_count(0), _M_key_compare(__x._M_key_compare)
-  { 
+    : _M_node_allocator(__x.get_allocator()), _M_header(0), _M_node_count(0), _M_key_compare(__x._M_key_compare)
+  {
+    _M_header = _M_get_node();
     if (__x._M_root() == 0)
       _M_empty_initialize();
     else {
@@ -534,7 +578,7 @@ public:
     }
     _M_node_count = __x._M_node_count;
   }
-  ~_Rb_tree() { clear(); }
+  ~_Rb_tree() { clear(); _M_put_node(_M_header); }
   _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& 
   operator=(const _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>& __x);
 
