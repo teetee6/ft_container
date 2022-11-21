@@ -19,7 +19,7 @@ struct pair
     pair(_T1 const& __t1, _T2 const& __t2) : first(__t1), second(__t2) {}
 
     template <class _U1, class _U2>
-    pair(const pair<_U1, _U2>& __p) : first(__p.first), second(__p.second) {} //
+    pair(const pair<_U1, _U2>& __p) : first(__p.first), second(__p.second) {}
 
     pair& operator=(pair const& __p) {
         first = __p.first;
@@ -86,7 +86,6 @@ pair<_T1,_T2> make_pair(_T1 __x, _T2 __y)
     return pair<_T1, _T2>(__x, __y);
 }
 
-// distance로 바꿀까?
 template < class InputIterator >
 typename ft::iterator_traits< InputIterator >::difference_type distance(InputIterator first, InputIterator last) {
   typedef typename ft::iterator_traits< InputIterator >::difference_type size_type;
@@ -100,6 +99,6 @@ typename ft::iterator_traits< InputIterator >::difference_type distance(InputIte
   return n;
 }
 
-}
+}   //namespace ft
 
 #endif

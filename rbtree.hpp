@@ -1,8 +1,13 @@
+#ifndef __RBTREE_HPP_
+#define __RBTREE_HPP_
+
 #include <iostream>
 #include <typeinfo>
 #include "iterator.hpp"
 #include "algorithm.hpp"
 #include "utility.hpp"
+
+namespace ft {
 
 typedef bool _Rb_tree_Color_type;
 const _Rb_tree_Color_type _S_rb_tree_red = false;
@@ -40,14 +45,9 @@ struct _Rb_tree_node : public _Rb_tree_node_base
 };
 
 
-// struct _Rb_tree_base_iterator
-// {
-   
-// };
- 
- template <class _Value, class _Ref, class _Ptr>
- struct _Rb_tree_iterator
- {
+template <class _Value, class _Ref, class _Ptr>
+struct _Rb_tree_iterator
+{
     typedef _Rb_tree_node_base::_Base_ptr                           _Base_ptr;
     typedef ft::bidirectional_iterator_tag                          iterator_category;
     typedef _Value                                                  value_type;
@@ -411,7 +411,7 @@ public:
 
 protected:
   allocator_type        _M_node_allocator;
-  _Rb_tree_node<_Tp>*   _M_header;      // cache노드. left는 leftMost, right는 rightMost, parent는 root를 캐싱하고 있을 것임
+  _Rb_tree_node<_Tp>*   _M_header;      // caching node. ->left is leftMost(), ->right is rightMost(), ->parent is root()
 
   _Rb_tree_node<_Tp>* _M_get_node()         { return _M_node_allocator.allocate(1); }
   void _M_put_node(_Rb_tree_node<_Tp>* __p) { _M_node_allocator.deallocate(__p, 1); }
@@ -1156,10 +1156,14 @@ struct rb_tree : public _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>
   ~rb_tree() {}
 };
 
-int main() {
+} // namespace ft
+
+#endif
+
+// int main() {
     // _Rb_tree_iterator<int, int, int*> it;
     // *it;
     // rb_tree();
     // rb_tree<int, int,>   rbtree;
-}
+// }
 // https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a01056_source.html
