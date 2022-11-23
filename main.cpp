@@ -1,22 +1,18 @@
-#include "map.hpp"
+#include "set.hpp"
 #include <string>
 #include "utility.hpp"
+#include <list>
+#include <set>
 
 int main() {
-    ft::map<int, std::string, std::greater<int> > mp, mp2;
-	mp.insert(ft::pair<int, std::string>(42, "lol"));
-    mp.insert(ft::pair<int, std::string>(42, "mdr"));
+    std::set<int> a;
+    std::list<int> lst;
+	unsigned int lst_size = 10;
+	for (unsigned int i = 0; i < lst_size; ++i)
+		lst.push_back(i);
+	ft::set<int> st(lst.begin(), lst.end());
 
-    mp.insert(ft::pair<int, std::string>(50, "mdr"));
-    mp.insert(ft::pair<int, std::string>(35, "funny"));
+    st.erase(st.begin());
+    // st.erase(3);
 
-    mp.insert(ft::pair<int, std::string>(45, "bunny"));
-    mp.insert(ft::pair<int, std::string>(21, "fizz"));
-    mp.insert(ft::pair<int, std::string>(38, "buzz"));
-    mp.insert(mp.begin(), ft::pair<int, std::string>(55, "fuzzy"));
-
-    typedef ft::map<int, std::string>::iterator iter;
-    for(iter it = mp.begin(); it != mp.end(); it++) {
-        std::cout << it->first << " and " << it->second << std::endl;
-    }
 }

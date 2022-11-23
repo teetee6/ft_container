@@ -61,9 +61,9 @@ struct _Rb_tree_iterator
  
     _Base_ptr _M_node;
 
-    operator _Rb_tree_iterator<value_type, const reference, const pointer>() {
-		  return _Rb_tree_iterator<value_type, const reference, const pointer>(_M_node);
-  	}
+    // operator _Rb_tree_iterator<_Value, const reference, const pointer>() {
+		//   return _Rb_tree_iterator<_Value, const reference, const pointer>(_M_node);
+  	// }
 
    _Rb_tree_iterator() {}
    _Rb_tree_iterator(_Link_type __x) { _M_node = __x; }
@@ -400,32 +400,9 @@ inline _Rb_tree_node_base* _Rb_tree_erase_fix(
   return __y;
 }
 
-
-// template <class _Tp, class _Alloc>
-// class _Rb_tree_base
-// {
-// public:
-//   typedef _Alloc                                allocator_type;
-//   allocator_type get_allocator() const          { return _M_node_allocator; }
-//   _Rb_tree_base(const allocator_type& __a) : _M_node_allocator(__a), _M_header(0) {
-//     _M_header = _M_get_node();
-//   }
-//   ~_Rb_tree_base()                              { _M_put_node(_M_header); }
-
-// protected:
-//   allocator_type        _M_node_allocator;
-//   _Rb_tree_node<_Tp>*   _M_header;      // caching node. ->left is leftMost(), ->right is rightMost(), ->parent is root()
-
-//   _Rb_tree_node<_Tp>* _M_get_node()         { return _M_node_allocator.allocate(1); }
-//   void _M_put_node(_Rb_tree_node<_Tp>* __p) { _M_node_allocator.deallocate(__p, 1); }
-// };
-
-
 template <class _Key, class _Value, class _KeyOfValue, class _Compare,
           class _Alloc = std::allocator<_Value> >
 class _Rb_tree {
-// private:
-  // typedef _Rb_tree_base<_Value, _Alloc> _Base;
 protected:
   typedef _Rb_tree_node_base* _Base_ptr;
   typedef _Rb_tree_node<_Value> _Rb_tree_node;
@@ -442,17 +419,6 @@ public:
   typedef size_t size_type;
   typedef ptrdiff_t difference_type;
 
-  // allocator_type get_allocator() const { return _Base::get_allocator(); }
-  // allocator_type get_allocator() const { return _M_node_allocator; }
-
-// protected:
-//   // typename _Base::_M_get_node  _M_get_node;
-//   // typename _Base::_M_put_node  _M_put_node;
-//   // typename _Base::_M_header    _M_header;
-//   allocator_type  _M_node_allocator;
-//   _Rb_tree_node<_Tp>* _M_get_node()         { return _M_node_allocator.allocate(1); }
-//   void _M_put_node(_Rb_tree_node<_Tp>* __p) { _M_node_allocator.deallocate(__p, 1); }
-
 protected:
   typedef typename _Alloc::template rebind<_Rb_tree_node>::other _node_alloc_type;
   _node_alloc_type        _M_node_allocator;  // _Rb_tree_node
@@ -460,31 +426,16 @@ protected:
 
   // caching node. ->left is leftMost(), ->right is rightMost(), ->parent is root()
   _Rb_tree_node*   _M_header;
-
-  // 'ft::_Rb_tree<int, ft::pair<const int, std::__1::basic_string<char> >, ft::_Select1st<ft::pair<const int,
-  //     std::__1::basic_string<char> > >, ft::less<int>, std::__1::allocator<ft::pair<const int, std::__1::basic_string<char> > > >::_Rb_tree_node *' 
-  //     (aka
-  //     '_Rb_tree_node<ft::pair<const int, std::__1::basic_string<char> > > *'
-
-  // 'std::__1::allocator<ft::pair<const int, std::__1::basic_string<char> > >::pointer' (aka 'ft::pair<const int, std::__1::basic_string<char> > *'
-
   _Rb_tree_node* _M_get_node()         { return _M_node_allocator.allocate(1); }
   void _M_put_node(_Rb_tree_node* __p) { _M_node_allocator.deallocate(__p, 1); }
 
 public:
   _node_alloc_type get_allocator() const          { return _M_node_allocator; }
-  // _Rb_tree_base(const allocator_type& __a) : _M_node_allocator(__a), _M_header(0) {
-  //   _M_header = _M_get_node();
-  // }
-  // ~_Rb_tree_base()                              { _M_put_node(_M_header); }
-
-
 
 protected:
   _Link_type _M_create_node(const value_type& __x)
   {
     _Link_type __tmp = _M_get_node();
-    // typename _Alloc::template rebind<_Rb_tree_node<value_type> >::other
     __value_allocator.construct(&__tmp->_M_value_field, __x);
     return __tmp;
   }
@@ -530,8 +481,8 @@ protected:
   static _Link_type _S_maximum(_Link_type __x)  { return static_cast<_Link_type>(_Rb_tree_node_base::_S_maximum(__x)); }
 
 public:
-  typedef _Rb_tree_iterator<value_type, reference, pointer>               iterator;
-  typedef _Rb_tree_iterator<value_type, const_reference, const_pointer>   const_iterator;
+  typedef _Rb_tree_iterator<value_type, reference, reference>               iterator;
+  typedef _Rb_tree_iterator<value_type, const_reference, const_reference>   const_iterator;
   typedef ft::reverse_iterator<iterator>                                  reverse_iterator;
   typedef ft::reverse_iterator<const_iterator>                            const_reverse_iterator;
 
@@ -623,7 +574,7 @@ public:
   template <class _InputIterator>
   void insert_equal(_InputIterator __first, _InputIterator __last);
 
-  void erase(iterator __position);
+  void erase(const_iterator __position);
   size_type erase(const key_type& __x);
   void erase(iterator __first, iterator __last);
   void erase(const key_type* __first, const key_type* __last);
@@ -917,7 +868,7 @@ void _Rb_tree<_Key,_Val,_KoV,_Cmp,_Alloc>
 template <class _Key, class _Value, class _KeyOfValue, 
           class _Compare, class _Alloc>
 inline void _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::erase(iterator __position)
+  ::erase(const_iterator __position)
 {
   _Link_type __y = (_Link_type) _Rb_tree_erase_fix(
       __position._M_node, _M_header->_M_parent, _M_header->_M_left, _M_header->_M_right);
@@ -1204,10 +1155,4 @@ struct rb_tree : public _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>
 
 #endif
 
-// int main() {
-    // _Rb_tree_iterator<int, int, int*> it;
-    // *it;
-    // rb_tree();
-    // rb_tree<int, int,>   rbtree;
-// }
-// https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a01056_source.html
+// referenced from https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a01056_source.html

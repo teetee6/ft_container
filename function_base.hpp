@@ -25,6 +25,13 @@ namespace ft {
         const typename _Pair::first_type& operator()(const _Pair& __x) const { return __x.first; }
     };
 
+    template <class T>
+    struct _Identity : public unary_function<T, T>
+    {
+        T& operator()(T& __x) const { return __x; }
+        const T& operator()(const T& __x) const { return __x; }
+    };
+
 
     template <class _Tp>
     struct less : public binary_function<_Tp, _Tp, bool>

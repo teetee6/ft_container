@@ -35,17 +35,17 @@ namespace ft
 
     private:
       /// This turns a red-black tree into a [multi]map. 
-      typedef typename _Alloc::template rebind<value_type>::other _Pair_alloc_type;  // why need? if caller inserts explicitly _Alloc, rebind to value_type!
-      typedef ft::rb_tree<key_type, value_type, ft::_Select1st<value_type>, key_compare, _Pair_alloc_type> _Rb_tree;
+      // typedef typename _Alloc::template rebind<value_type>::other allocator_type;  // why need? if caller inserts explicitly _Alloc, rebind to value_type! (no need. I delegated it to _RB_tree)
+      typedef ft::rb_tree<key_type, value_type, ft::_Select1st<value_type>, key_compare, allocator_type> _Rb_tree;
 
       /// The actual tree structure.
       _Rb_tree _M_t;
 
     public:
-      typedef typename _Pair_alloc_type::pointer         pointer;
-      typedef typename _Pair_alloc_type::const_pointer   const_pointer;
-      typedef typename _Pair_alloc_type::reference       reference;
-      typedef typename _Pair_alloc_type::const_reference const_reference;
+      typedef typename allocator_type::pointer         pointer;
+      typedef typename allocator_type::const_pointer   const_pointer;
+      typedef typename allocator_type::reference       reference;
+      typedef typename allocator_type::const_reference const_reference;
       typedef typename _Rb_tree::iterator               iterator;
       typedef typename _Rb_tree::const_iterator         const_iterator;
       typedef typename _Rb_tree::size_type              size_type;
@@ -141,7 +141,7 @@ namespace ft
 
       // this code is equivalent to std::make_pair(c.lower_bound(val), c.upper_bound(val))
       ft::pair<iterator, iterator> equal_range(const key_type& __x)   { return _M_t.equal_range(__x); }
-      std::pair<const_iterator, const_iterator> equal_range(const key_type& __x) const    { return _M_t.equal_range(__x); }
+      ft::pair<const_iterator, const_iterator> equal_range(const key_type& __x) const    { return _M_t.equal_range(__x); }
 
       template<typename _K1, typename _T1, typename _C1, typename _A1> 
       friend bool operator==(const map<_K1, _T1, _C1, _A1>&, const map<_K1, _T1, _C1, _A1>&);
@@ -195,9 +195,3 @@ namespace ft
 } // namespace std
 
 #endif /* _STL_MAP_H */
-
-// int main() {
-  
-
-//   return 0;
-// }
