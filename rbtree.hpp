@@ -61,9 +61,9 @@ struct _Rb_tree_iterator
  
     _Base_ptr _M_node;
 
-    operator _Rb_tree_iterator<_Value, const reference, const pointer>() {
-		  return _Rb_tree_iterator<_Value, const reference, const pointer>(_M_node);
-  	}
+    // operator _Rb_tree_iterator<value_type, const reference, const pointer>() {
+		//   return _Rb_tree_iterator<value_type, const reference, const pointer>(_M_node);
+  	// }
 
    _Rb_tree_iterator() {}
    _Rb_tree_iterator(_Link_type __x) { _M_node = __x; }
@@ -481,8 +481,8 @@ protected:
   static _Link_type _S_maximum(_Link_type __x)  { return static_cast<_Link_type>(_Rb_tree_node_base::_S_maximum(__x)); }
 
 public:
-  typedef _Rb_tree_iterator<value_type, reference, reference>               iterator;
-  typedef _Rb_tree_iterator<value_type, const_reference, const_reference>   const_iterator;
+  typedef _Rb_tree_iterator<value_type, reference, pointer>               iterator;
+  typedef _Rb_tree_iterator<value_type, const_reference, const_pointer>   const_iterator;
   typedef ft::reverse_iterator<iterator>                                  reverse_iterator;
   typedef ft::reverse_iterator<const_iterator>                            const_reverse_iterator;
 
