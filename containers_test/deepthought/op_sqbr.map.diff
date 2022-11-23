@@ -1,19 +1,8 @@
-1,18d0
-< size: 3
+2c2
 < max_size: 256204778801521550
-< 
-< Content is:
-< - key: a | value: an element
-< - key: b | value: old element
-< - key: c | value: another element
-< ###############################################
-< insert a new element via operator[]: 
-< size: 4
+---
+> max_size: 18446744073709551615
+11c11
 < max_size: 256204778801521550
-< 
-< Content is:
-< - key: a | value: an element
-< - key: b | value: old element
-< - key: c | value: another element
-< - key: d | value: 
-< ###############################################
+---
+> max_size: 18446744073709551615
