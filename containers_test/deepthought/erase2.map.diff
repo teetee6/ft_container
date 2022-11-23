@@ -1,32 +1,84 @@
-2c2
+1,83d0
+< size: 6
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-15c15
+< 
+< Content is:
+< - key: 0 | value: AAAAAA
+< - key: 1 | value: BBBBB
+< - key: 2 | value: CCCC
+< - key: 3 | value: DDD
+< - key: 4 | value: EE
+< - key: 5 | value: F
+< ###############################################
+< 	-- [0] --
+< ret: 1
+< size: 5
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-27c27
+< 
+< Content is:
+< - key: 0 | value: AAAAAA
+< - key: 1 | value: BBBBB
+< - key: 3 | value: DDD
+< - key: 4 | value: EE
+< - key: 5 | value: F
+< ###############################################
+< 	-- [1] --
+< ret: 1
+< size: 4
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-38c38
+< 
+< Content is:
+< - key: 0 | value: AAAAAA
+< - key: 1 | value: BBBBB
+< - key: 4 | value: EE
+< - key: 5 | value: F
+< ###############################################
+< 	-- [2] --
+< ret: 1
+< size: 3
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-48c48
+< 
+< Content is:
+< - key: 1 | value: BBBBB
+< - key: 4 | value: EE
+< - key: 5 | value: F
+< ###############################################
+< 	-- [3] --
+< ret: 1
+< size: 2
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-55c55
+< 
+< Content is:
+< - key: 1 | value: BBBBB
+< - key: 4 | value: EE
+< ###############################################
+< size: 4
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-66c66
+< 
+< Content is:
+< - key: -1 | value: Hello
+< - key: 1 | value: BBBBB
+< - key: 4 | value: EE
+< - key: 10 | value: Hi there
+< ###############################################
+< 	-- [4] --
+< ret: 0
+< size: 4
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
-77c77
+< 
+< Content is:
+< - key: -1 | value: Hello
+< - key: 1 | value: BBBBB
+< - key: 4 | value: EE
+< - key: 10 | value: Hi there
+< ###############################################
+< 	-- [5] --
+< ret: 1
+< size: 3
 < max_size: 288230376151711743
----
-> max_size: 18446744073709551615
+< 
+< Content is:
+< - key: -1 | value: Hello
+< - key: 4 | value: EE
+< - key: 10 | value: Hi there
+< ###############################################

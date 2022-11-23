@@ -61,9 +61,9 @@ struct _Rb_tree_iterator
  
     _Base_ptr _M_node;
 
-    // operator _Rb_tree_iterator<_Value, const reference, const pointer>() {
-		//   return _Rb_tree_iterator<_Value, const reference, const pointer>(_M_node);
-  	// }
+    operator _Rb_tree_iterator<_Value, const reference, const pointer>() {
+		  return _Rb_tree_iterator<_Value, const reference, const pointer>(_M_node);
+  	}
 
    _Rb_tree_iterator() {}
    _Rb_tree_iterator(_Link_type __x) { _M_node = __x; }
@@ -574,7 +574,7 @@ public:
   template <class _InputIterator>
   void insert_equal(_InputIterator __first, _InputIterator __last);
 
-  void erase(const_iterator __position);
+  void erase(iterator __position);
   size_type erase(const key_type& __x);
   void erase(iterator __first, iterator __last);
   void erase(const key_type* __first, const key_type* __last);
@@ -868,7 +868,7 @@ void _Rb_tree<_Key,_Val,_KoV,_Cmp,_Alloc>
 template <class _Key, class _Value, class _KeyOfValue, 
           class _Compare, class _Alloc>
 inline void _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::erase(const_iterator __position)
+  ::erase(iterator __position)
 {
   _Link_type __y = (_Link_type) _Rb_tree_erase_fix(
       __position._M_node, _M_header->_M_parent, _M_header->_M_left, _M_header->_M_right);
