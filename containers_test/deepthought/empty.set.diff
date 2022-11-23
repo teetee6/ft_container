@@ -1,49 +1,16 @@
-1,48d0
-< is_empty: 0
-< size: 7
+3c3
 < max_size: 576460752303423487
-< 
-< Content is:
-< - value: a
-< - value: b
-< - value: c
-< - value: d
-< - value: e
-< - value: f
-< - value: g
-< ###############################################
-< is_empty: 1
-< is_empty: 0
-< size: 10
+---
+> max_size: 18446744073709551615
+17c17
 < max_size: 576460752303423487
-< 
-< Content is:
-< - value: 
-< - value: 
-< - value: #
-< - value: a
-< - value: b
-< - value: c
-< - value: d
-< - value: e
-< - value: f
-< - value: g
-< ###############################################
-< size: 7
+---
+> max_size: 18446744073709551615
+32c32
 < max_size: 576460752303423487
-< 
-< Content is:
-< - value: a
-< - value: b
-< - value: c
-< - value: d
-< - value: e
-< - value: f
-< - value: g
-< ###############################################
-< is_empty: 1
-< size: 0
+---
+> max_size: 18446744073709551615
+45c45
 < max_size: 576460752303423487
-< 
-< Content is:
-< ###############################################
+---
+> max_size: 18446744073709551615

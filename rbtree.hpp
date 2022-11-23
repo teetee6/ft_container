@@ -566,17 +566,21 @@ public:
     /* insert/erase */
   ft::pair<iterator,bool> insert_unique(const value_type& __x);
   iterator insert_equal(const value_type& __x);
-  iterator insert_unique(iterator __position, const value_type& __x);
-  iterator insert_equal(iterator __position, const value_type& __x);
+  iterator insert_unique(const_iterator __position, const value_type& __x);
+  iterator insert_equal(const_iterator __position, const value_type& __x);
 
   template <class _InputIterator>
   void insert_unique(_InputIterator __first, _InputIterator __last);
   template <class _InputIterator>
   void insert_equal(_InputIterator __first, _InputIterator __last);
 
-  void erase(iterator __position);
+  // why parameter is const_iterator? because the iterator of ft::set is the const_iterator of _Rb_tree
+  // so, when erase(iterator __position) is executed, it evaluates to below 
+  //  iterator __position = (const_iterator) rvalue;
+  // and SFINAE error! so to workaround the ft::set's issue, changed parameter's iterator to const_iterator intentionally!
+  void erase(const_iterator __position);  
   size_type erase(const key_type& __x);
-  void erase(iterator __first, iterator __last);
+  void erase(const_iterator __first, const_iterator __last);
   void erase(const key_type* __first, const key_type* __last);
   void clear() {
     if (_M_node_count != 0) {
@@ -779,7 +783,7 @@ template <class _Key, class _Val, class _KeyOfValue,
           class _Compare, class _Alloc>
 typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator 
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>
-  ::insert_unique(iterator __position, const _Val& __v)
+  ::insert_unique(const_iterator __position, const _Val& __v)
 {
   // if using cache is possible, don't explore from root to NIL node!
   // __position == begin()
@@ -797,7 +801,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>
     else
       return insert_unique(__v).first;
   } else {
-    iterator __before = __position;
+    const_iterator __before = __position;
     --__before;
     // before < v < position
     if (_M_key_compare(_S_key(__before._M_node), _KeyOfValue()(__v)) 
@@ -818,7 +822,7 @@ template <class _Key, class _Val, class _KeyOfValue,
           class _Compare, class _Alloc>
 typename _Rb_tree<_Key,_Val,_KeyOfValue,_Compare,_Alloc>::iterator 
 _Rb_tree<_Key,_Val,_KeyOfValue,_Compare,_Alloc>
-  ::insert_equal(iterator __position, const _Val& __v)
+  ::insert_equal(const_iterator __position, const _Val& __v)
 {
   // __position == begin()
   if (__position._M_node == _M_header->_M_left) {
@@ -834,7 +838,7 @@ _Rb_tree<_Key,_Val,_KeyOfValue,_Compare,_Alloc>
     else
       return insert_equal(__v);
   } else {
-    iterator __before = __position;
+    const_iterator __before = __position;
     --__before;
     // before <= v <= position
     if (!_M_key_compare(_KeyOfValue()(__v), _S_key(__before._M_node))
@@ -868,7 +872,7 @@ void _Rb_tree<_Key,_Val,_KoV,_Cmp,_Alloc>
 template <class _Key, class _Value, class _KeyOfValue, 
           class _Compare, class _Alloc>
 inline void _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::erase(iterator __position)
+  ::erase(const_iterator __position)
 {
   _Link_type __y = (_Link_type) _Rb_tree_erase_fix(
       __position._M_node, _M_header->_M_parent, _M_header->_M_left, _M_header->_M_right);
@@ -930,7 +934,7 @@ void _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
 template <class _Key, class _Value, class _KeyOfValue, 
           class _Compare, class _Alloc>
 void _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::erase(iterator __first, iterator __last)
+  ::erase(const_iterator __first, const_iterator __last)
 {
   if (__first == begin() && __last == end())
     clear();
