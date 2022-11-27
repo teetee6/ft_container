@@ -305,7 +305,6 @@ public:
 				}
 				while (__first != __last) {
 					this->__alloc.construct(__new_end_++, *__first++); // insert elements
-					std::cout << *__first << std::endl;
 				}
 
 				for(; __iter != __end_; ++__iter) {

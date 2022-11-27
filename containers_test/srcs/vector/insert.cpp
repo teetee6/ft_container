@@ -21,23 +21,23 @@ int		main(void)
 	TESTED_NAMESPACE::vector<TESTED_TYPE> vct3;
 
 	for (unsigned long int i = 0; i < vct.size(); ++i)
-		vct[i] = (vct.size() - i) * 3;
+		vct[i] = (vct.size() - i) * 3;	// 30 27 ... 3
 	printSize(vct);
 
 	vct2.insert(vct2.end(), 42);
-	vct2.insert(vct2.begin(), 2, 21);
+	vct2.insert(vct2.begin(), 2, 21); // 21 21 42
 	printSize(vct2);
 
-	vct2.insert(vct2.end() - 2, 42);
+	vct2.insert(vct2.end() - 2, 42);	// 21 42 21 42
 	printSize(vct2);
 
-	vct2.insert(vct2.end(), 2, 84);
+	vct2.insert(vct2.end(), 2, 84);	// 21 42 21 42 84 84
 	printSize(vct2);
 
-	vct2.resize(4);
+	vct2.resize(4);	// 21 42 21 42
 	printSize(vct2);
 
-	vct2.insert(vct2.begin() + 2, vct.begin(), vct.end());
+	vct2.insert(vct2.begin() + 2, vct.begin(), vct.end());	//  21 42 [30 27 ... 3] 21 42
 	vct.clear();
 	printSize(vct2);
 
