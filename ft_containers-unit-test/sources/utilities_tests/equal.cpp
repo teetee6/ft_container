@@ -1,5 +1,8 @@
 #include "../system/system_methods.ipp"
 #include UTILITIES
+#include UTIL1
+#include UTIL2
+#include UTIL3
 
 bool equal_test() {
 	std::string s = "approvjvorppa";

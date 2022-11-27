@@ -1,5 +1,8 @@
 #include "../system/system_methods.ipp"
 #include UTILITIES
+#include UTIL1
+#include UTIL2
+#include UTIL3
 
 bool lexicographical_test() {
 	std::vector<int> result, result2;

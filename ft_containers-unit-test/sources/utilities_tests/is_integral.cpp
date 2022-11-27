@@ -1,5 +1,8 @@
 #include "../system/system_methods.ipp"
 #include UTILITIES
+#include UTIL1
+#include UTIL2
+#include UTIL3
 
 bool is_integral_test_() {
 	std::vector<int> v;

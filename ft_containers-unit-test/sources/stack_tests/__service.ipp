@@ -45,9 +45,9 @@ int run_stack_unit_test(std::string test_name, std::vector<int> (func1)(std::sta
 	    printElement("FAILED");
 	    result = 1;
 	}
-	t1 = g_end1 - g_start1, t2 = g_end2 - g_start2;
-	(t1 >= t2) ? printElement(GREEN + std::to_string(t2) + "ms" + RESET) : printElement(REDD + std::to_string(t2) + "ms" + RESET);
-	(t1 > t2) ? printElement(REDD + std::to_string(t1) + "ms" + RESET) : printElement(GREEN + std::to_string(t1) + "ms" + RESET);
+	t1 = g_end1 - g_start1, t2 = g_end2 - g_start2;	// std , ft
+	(t1 >= t2) ? printElement(GREEN + std::to_string(t2) + "ms" + RESET) : printElement(REDD + std::to_string(t2) + "ms" + RESET);	// ft
+	(t1 > t2) ? printElement(REDD + std::to_string(t1) + "ms" + RESET) : printElement(GREEN + std::to_string(t1) + "ms" + RESET);	// std
 	leaks = leaks_test(getpid());
 	cout << endl;
 

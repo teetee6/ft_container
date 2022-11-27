@@ -10,6 +10,9 @@
 #define MAP			  	"../../../map.hpp"
 #define SET			  	"../../../set.hpp"
 #define UTILITIES		"../../../utility.hpp"
+#define UTIL1           "../../../algorithm.hpp"
+#define UTIL2           "../../../type_traits.hpp"
+#define UTIL3           "../../../iterator.hpp"
 
 /* comment this to turn OFF flags (-WWW, -std=98) */
 // #define FLAGS

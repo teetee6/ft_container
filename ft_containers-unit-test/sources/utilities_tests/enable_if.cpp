@@ -1,5 +1,8 @@
 #include "../system/system_methods.ipp"
 #include UTILITIES
+#include UTIL1
+#include UTIL2
+#include UTIL3
 
 template <class T> typename _enable_if< std::is_unsigned<T>::value >::type
 		foo(T) {
