@@ -39,6 +39,7 @@ template <>          struct __libcpp_is_integral<long>               : public tr
 template <>          struct __libcpp_is_integral<unsigned long>      : public true_type {};
 template <>          struct __libcpp_is_integral<long long>          : public true_type {};
 template <>          struct __libcpp_is_integral<unsigned long long> : public true_type {};
+template <>          struct __libcpp_is_integral<char16_t>           : public true_type {};
 #ifndef _LIBCPP_HAS_NO_INT128
 template <>          struct __libcpp_is_integral<__int128_t>         : public true_type {};
 template <>          struct __libcpp_is_integral<__uint128_t>        : public true_type {};

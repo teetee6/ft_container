@@ -124,9 +124,55 @@ public:
 		if (__sz > max_size())
 			throw std::out_of_range("resize() Out of range exception");
 		size_type __cs = size();
-		if (__cs < __sz)
-			this->insert(this->__end_, __sz - __cs, __x);
-		else if (__cs > __sz) {
+		if (__cs < __sz)	// fill in rest spaces (if not enough memory, capacity *= 2) 
+		{
+			{	// in lieu of this->insert(this->__end_, __sz - __cs, __x)! because when realloation() new_capacity must be 2 times, not + __n
+				size_type __n = __sz - __cs;
+				iterator __position = this->__end_;
+				const_reference __x = __x;
+				if (__n > 0)
+				{
+					pointer __p = this->__begin_ + (__position - begin());
+					if (__n <= static_cast<size_type>(this->capacity() - this->size())) // enough memory
+					{
+						pointer __iter = this->__end_;
+						if (__p < __iter) { // just move hops
+							while (__iter != __p) {
+								--__iter;
+								this->__alloc.construct(__iter + __n, *__iter);
+								this->__alloc.destroy(__iter);
+							}
+						}
+						this->__end_ += __n;
+						while (__n--) this->__alloc.construct(__iter + __n, __x); // insert elements
+					}
+					else // reallocate
+					{
+						size_type new_capacity = capacity() * 2;
+						while (new_capacity < size() + __n)	new_capacity *= 2;
+						pointer __new_end_, __new_start_;
+						__new_end_ = __new_start_ = this->__alloc.allocate(new_capacity);
+
+						pointer __iter;
+						for(__iter = this->__begin_; __iter != __p; ++__iter) {	// copy from origin
+							this->__alloc.construct(__new_end_++, *__iter);
+							this->__alloc.destroy(__iter);
+						}
+						while (__n--) this->__alloc.construct(__new_end_++, __x); // insert elements
+						for(; __iter != __end_; ++__iter) {	// copy from origin
+							this->__alloc.construct(__new_end_++, *__iter);
+							this->__alloc.destroy(__iter);
+						}
+						this->__alloc.deallocate(this->__begin_, this->capacity());
+						
+						this->__begin_ = __new_start_;
+						this->__end_ = __new_end_;
+						this->__end_cap_ = this->__begin_ + new_capacity;
+					}
+				}
+			}
+		}
+		else if (__cs > __sz) {		// shrink
 			while (__cs-- > __sz) {
 				--this->__end_;
         		this->__alloc.destroy(this->__end_);
@@ -181,6 +227,7 @@ public:
 			else
 				__cap = (this->__end_cap_ - this->__begin_) * 2;
 			this->reserve(__cap);
+			// this->insert(this->end(), __x);
 			this->__alloc.construct(this->__end_, __x);
 			++this->__end_;
 		}
@@ -217,6 +264,7 @@ public:
 		}
 		else // reallocate
 		{
+			// size_type new_capacity = capacity() * 2;
 			this->clear();
 			this->__alloc.deallocate(this->__begin_, this->capacity());
 			this->__begin_ = this->__end_ = this->__alloc.allocate(__n);
@@ -227,7 +275,45 @@ public:
 
     iterator insert(iterator __position, const_reference __x) {
 		const size_type __n = __position - begin();
-		this->insert(__position, 1, __x);
+		// this->insert(__position, 1, __x);
+	{
+		pointer __p = this->__begin_ + (__position - begin());
+		if (1 <= static_cast<size_type>(this->capacity() - this->size())) // enough memory
+		{
+			pointer __iter = this->__end_;
+			if (__p < __iter) { // just move hops
+				while (__iter != __p) {
+					--__iter;
+					this->__alloc.construct(__iter + 1, *__iter);
+					this->__alloc.destroy(__iter);
+				}
+			}
+			this->__end_ += 1;
+			this->__alloc.construct(__iter + 1, __x); // insert elements
+		}
+		else // reallocate
+		{
+			size_type new_capacity = capacity() * 2;
+			pointer __new_end_, __new_start_;
+			__new_end_ = __new_start_ = this->__alloc.allocate(new_capacity);
+
+			pointer __iter;
+			for(__iter = this->__begin_; __iter != __p; ++__iter) {	// copy from origin
+				this->__alloc.construct(__new_end_++, *__iter);
+				this->__alloc.destroy(__iter);
+			}
+			this->__alloc.construct(__new_end_++, __x); // insert elements
+			for(; __iter != __end_; ++__iter) {	// copy from origin
+				this->__alloc.construct(__new_end_++, *__iter);
+				this->__alloc.destroy(__iter);
+			}
+			this->__alloc.deallocate(this->__begin_, this->capacity());
+			
+			this->__begin_ = __new_start_;
+			this->__end_ = __new_end_;
+			this->__end_cap_ = this->__begin_ + new_capacity;
+		}
+	}
 		return iterator(this->__begin_ + __n);
 	}
 
@@ -250,17 +336,18 @@ public:
 			}
 			else // reallocate
 			{
+				size_type new_capacity = capacity() + __n;
+				while (new_capacity < size() + __n)	new_capacity *= 2;
 				pointer __new_end_, __new_start_;
-				__new_end_ = __new_start_ = this->__alloc.allocate(size() + __n);
+				__new_end_ = __new_start_ = this->__alloc.allocate(new_capacity);
 
 				pointer __iter;
-				for(__iter = this->__begin_; __iter != __p; ++__iter) {
+				for(__iter = this->__begin_; __iter != __p; ++__iter) {	// copy from origin
 					this->__alloc.construct(__new_end_++, *__iter);
 					this->__alloc.destroy(__iter);
 				}
 				while (__n--) this->__alloc.construct(__new_end_++, __x); // insert elements
-
-				for(; __iter != __end_; ++__iter) {
+				for(; __iter != __end_; ++__iter) {	// copy from origin
 					this->__alloc.construct(__new_end_++, *__iter);
 					this->__alloc.destroy(__iter);
 				}
@@ -268,7 +355,7 @@ public:
 				
 				this->__begin_ = __new_start_;
 				this->__end_ = __new_end_;
-				this->__end_cap_ = this->__begin_ + size();
+				this->__end_cap_ = this->__begin_ + new_capacity;
 			}
 		}
 		return ;
@@ -277,6 +364,7 @@ public:
 	void insert(iterator __position, _InputIterator __first, _InputIterator __last,
 		typename ft::enable_if<!ft::is_integral< _InputIterator >::value >::type* = NULL) {
 		size_type __n = ft::distance(__first, __last);
+		
 		if (__n > 0)
 		{
 			pointer __p = this->__begin_ + (__position - begin());
@@ -295,18 +383,22 @@ public:
 			}
 			else // reallocate
 			{
+				size_type new_capacity = capacity() * 2;
+				if (new_capacity == 0)
+					new_capacity = 1;
+				else
+					while (new_capacity < size() + __n)	new_capacity *= 2;
 				pointer __new_end_, __new_start_;
-				__new_end_ = __new_start_ = this->__alloc.allocate(size() + __n);
+				__new_end_ = __new_start_ = this->__alloc.allocate(new_capacity);
 
 				pointer __iter;
 				for(__iter = this->__begin_; __iter != __p; ++__iter) {
 					this->__alloc.construct(__new_end_++, *__iter);
 					this->__alloc.destroy(__iter);
 				}
-				while (__first != __last) {
-					this->__alloc.construct(__new_end_++, *__first++); // insert elements
-				}
 
+				while (__first != __last)	this->__alloc.construct(__new_end_++, *__first++); // insert elements
+				
 				for(; __iter != __end_; ++__iter) {
 					this->__alloc.construct(__new_end_++, *__iter);
 					this->__alloc.destroy(__iter);
@@ -315,13 +407,24 @@ public:
 				
 				this->__begin_ = __new_start_;
 				this->__end_ = __new_end_;
-				this->__end_cap_ = this->__begin_ + size();
+				this->__end_cap_ = this->__begin_ + new_capacity;
 			}
 		}
 		return ;
 	}
     
 	iterator erase(iterator __position) {
+		// size_type __n = this->end() - __position;
+		// // if (__n <= 0) return (iterator(__position));
+		// // std::cout << __n << std::endl;
+		// pointer __iter = this->__begin_ + __n;
+		// this->__alloc.destroy(__iter);
+		// while (__n--) {
+		// 	this->__alloc.construct(__iter, *(__iter + 1));
+		// 	this->__alloc.destroy(++__iter);
+		// }
+		// --this->__end_;
+		// return (iterator(__position));
 		return (erase(__position, __position + 1));
 	}
     iterator erase(iterator __first, iterator __last) {

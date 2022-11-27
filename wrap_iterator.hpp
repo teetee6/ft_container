@@ -5,7 +5,7 @@
 
 namespace ft {
 
-template <class _Iter> //int라 생각하시오(공식 라이브러리는 int *임)
+template <class _Iter> //consider as [int] (official library is [int *])
 class __wrap_iter
 {
 public:

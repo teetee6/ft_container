@@ -18,6 +18,21 @@ int main()
     std::cout << ft::is_integral<__int128_t>::value << std::endl;
     std::cout << ft::is_integral<__uint128_t>::value << std::endl;
     std::cout << ft::is_integral<Obj>::value << std::endl;
+    std::cout << "----------------------------------------------------------------" << std::endl;
+    std::cout << std::is_integral<bool>::value << std::endl;
+    std::cout << std::is_integral<char>::value << std::endl;
+    std::cout << std::is_integral<signed char>::value << std::endl;
+    std::cout << std::is_integral<unsigned char>::value << std::endl;
+    std::cout << std::is_integral<wchar_t>::value << std::endl;
+    std::cout << std::is_integral<short>::value << std::endl;
+    std::cout << std::is_integral<unsigned short>::value << std::endl;
+    std::cout << std::is_integral<int>::value << std::endl;
+    std::cout << std::is_integral<unsigned int>::value << std::endl;
+    std::cout << std::is_integral<unsigned long long>::value << std::endl;
+    std::cout << std::is_integral<__int128_t>::value << std::endl;
+    std::cout << std::is_integral<__uint128_t>::value << std::endl;
+    std::cout << std::is_integral<Obj>::value << std::endl;
+    std::cout << "----------------------------------------------------------------" << std::endl;
     std::cout << std::endl;
 
     int a = 5, b;
