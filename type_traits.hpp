@@ -2,7 +2,6 @@
 #define __TYPE_TRAITS_HPP_
 
 #include <typeinfo>
-#include <iostream>
 
 namespace ft {
     template <bool, class _Tp = void> struct enable_if {};

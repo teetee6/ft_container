@@ -450,15 +450,25 @@ public:
     void swap(vector& x) {
 		if (&x == this) return;
 
-		pointer __tmp_begin_ = x.__begin_;
-		pointer __tmp_end_ = x.__end_;
-		pointer __tmp_end_cap_ = x.__end_cap_;
-		x.__begin_ = this->__begin_;
-		x.__end_ = this->__end_;
-		x.__end_cap_ = this->__end_cap_;
-		this->__begin_ = __tmp_begin_;
-		this->__end_ = __tmp_end_;
-		this->__end_cap_ = __tmp_end_cap_;
+		ft::swap(this->__begin_, x.__begin_);
+		ft::swap(this->__end_, x.__end_);
+		ft::swap(this->__end_cap_, x.__end_cap_);
+		// pointer __tmp_begin_ = x.__begin_;
+		// pointer __tmp_end_ = x.__end_;
+		// pointer __tmp_end_cap_ = x.__end_cap_;
+		// x.__begin_ = this->__begin_;
+		// x.__end_ = this->__end_;
+		// x.__end_cap_ = this->__end_;
+		// this->__begin_ = __tmp_begin_;
+		// this->__end_ = __tmp_end_;
+		// this->__end_cap_ = __tmp_end_;
+
+		// pointer __tmp_begin_ = x.__begin_;
+		// pointer __tmp_end_ = x.__end_;
+		// x.__begin_ = this->__begin_;
+		// x.__end_ = x.__end_cap_ = this->__end_;
+		// this->__begin_ = __tmp_begin_;
+		// this->__end_ = this->__end_cap_ =  __tmp_end_;
   	};
 };
 

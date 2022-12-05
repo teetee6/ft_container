@@ -1159,4 +1159,4 @@ struct rb_tree : public _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>
 
 #endif
 
-// referenced from https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a01056_source.html
+// inspired by https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a01056_source.html

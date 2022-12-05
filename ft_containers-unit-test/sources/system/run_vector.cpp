@@ -31,7 +31,6 @@ int main(int argc, char* argv[], char* env[]) {
 	runFunctionTest("../vector_tests/insert(value).cpp", argv, env);
 	runFunctionTest("../vector_tests/insert(fill).cpp", argv, env);
 	runFunctionTest("../vector_tests/insert(std iterators).cpp", argv, env);
-	//////// runFunctionTest("../vector_tests/erase(value).cpp", argv, env);	// 시간초과(삭제할것)
 	runFunctionTest("../vector_tests/erase(range).cpp", argv, env);
 	runFunctionTest("../vector_tests/swap().cpp", argv, env);
 	runFunctionTest("../vector_tests/clear().cpp", argv, env);
