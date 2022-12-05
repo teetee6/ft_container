@@ -36,7 +36,7 @@ int main()
     std::cout << "----------------------------------------------------------------" << std::endl;
     std::cout << std::endl;
 
-    int a = 5, b;
+    int b;
     b = ft::integral_constant<int, 5>();
     std::cout << b << std::endl;
 
