@@ -1,4 +1,5 @@
 #include "type_traits.hpp"
+#include <iostream>
 
 struct Obj {};
 

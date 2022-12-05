@@ -129,7 +129,7 @@ public:
 			{	// in lieu of this->insert(this->__end_, __sz - __cs, __x)! because when realloation() new_capacity must be 2 times, not + __n
 				size_type __n = __sz - __cs;
 				iterator __position = this->__end_;
-				const_reference __x = __x;
+				// const_reference __x = __x;
 				if (__n > 0)
 				{
 					pointer __p = this->__begin_ + (__position - begin());
@@ -276,7 +276,7 @@ public:
     iterator insert(iterator __position, const_reference __x) {
 		const size_type __n = __position - begin();
 		// this->insert(__position, 1, __x);
-	{
+	{// start
 		pointer __p = this->__begin_ + (__position - begin());
 		if (1 <= static_cast<size_type>(this->capacity() - this->size())) // enough memory
 		{
@@ -289,11 +289,14 @@ public:
 				}
 			}
 			this->__end_ += 1;
-			this->__alloc.construct(__iter + 1, __x); // insert elements
+			// this->__end_cap_ += 1;
+			this->__alloc.construct(__iter, __x); // insert elements
 		}
 		else // reallocate
 		{
 			size_type new_capacity = capacity() * 2;
+			if (new_capacity == 0)
+				new_capacity = 1;
 			pointer __new_end_, __new_start_;
 			__new_end_ = __new_start_ = this->__alloc.allocate(new_capacity);
 
@@ -313,8 +316,13 @@ public:
 			this->__end_ = __new_end_;
 			this->__end_cap_ = this->__begin_ + new_capacity;
 		}
-	}
+	}// end
 		return iterator(this->__begin_ + __n);
+	
+	
+	//  const size_type __n = __position - begin();
+	// 	this->insert(__position, 1, __x);
+	// 	return iterator(this->__begin_ + __n);
 	}
 
     void insert(iterator __position, size_type __n, const_reference __x) {
@@ -332,6 +340,7 @@ public:
 					}
 				}
 				this->__end_ += __n;
+				// this->__end_cap_ += __n;
 				while (__n--) this->__alloc.construct(__iter + __n, __x); // insert elements
 			}
 			else // reallocate
@@ -385,9 +394,14 @@ public:
 			{
 				size_type new_capacity = capacity() * 2;
 				if (new_capacity == 0)
-					new_capacity = 1;
+					new_capacity = __n;
 				else
 					while (new_capacity < size() + __n)	new_capacity *= 2;
+				// size_type new_capacity;
+				// if (new_capacity == 0)
+				// 	new_capacity = 1;
+				// else
+				// 	new_capacity = size() + __n;
 				pointer __new_end_, __new_start_;
 				__new_end_ = __new_start_ = this->__alloc.allocate(new_capacity);
 

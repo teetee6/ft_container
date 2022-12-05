@@ -32,23 +32,23 @@ int		main(void)
 
 	ft_erase(st, ++st.begin());
 
-	// ft_erase(st, st.begin());
-	// ft_erase(st, --st.end());
+	ft_erase(st, st.begin());
+	ft_erase(st, --st.end());
 
-	// ft_erase(st, st.begin(), ++(++(++st.begin())));
-	// ft_erase(st, --(--(--st.end())), --st.end());
+	ft_erase(st, st.begin(), ++(++(++st.begin())));
+	ft_erase(st, --(--(--st.end())), --st.end());
 
-	// st.insert("Hello");
-	// st.insert("Hi there");
-	// printSize(st);
-	// ft_erase(st, --(--(--st.end())), st.end());
+	st.insert("Hello");
+	st.insert("Hi there");
+	printSize(st);
+	ft_erase(st, --(--(--st.end())), st.end());
 
-	// st.insert("ONE");
-	// st.insert("TWO");
-	// st.insert("THREE");
-	// st.insert("FOUR");
-	// printSize(st);
-	// ft_erase(st, st.begin(), st.end());
+	st.insert("ONE");
+	st.insert("TWO");
+	st.insert("THREE");
+	st.insert("FOUR");
+	printSize(st);
+	ft_erase(st, st.begin(), st.end());
 
 	return (0);
 }
