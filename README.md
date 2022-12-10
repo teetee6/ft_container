@@ -47,4 +47,16 @@ https://stackedit.io/app# 에서 작업
 - iterator  erase(iterator  __first, iterator  __last) <br/>
 ---> __first부터 시작해서 __n단위로 홉을 앞으로 당기다가, end()를 마주치면 end갱신 후, 이전 end가 나올떄까지 다시 진행해가며 destroy <br/>
 
-##
+## map
+---> std::map::value_compare ? std::map::value_type(std::pair<>)을 비교(key값끼리 비교)하는 함수 객체
+사용법을 자꾸 까먹는 함수
+```c++
+int main() {
+    ft::map<int, std::string> Map;
+    ft::pair<int, std::string> a(3, "good"), b(5, "bye");
+    std::cout << Map.value_comp()(a, b) << std::endl;   // 기본 비교함수 ft::less
+    std::cout << ft::_Select1st<ft::pair<int, std::string> >()(a) << std::endl; // ft::pair의 first를 반환해주는 함수
+    std::cout << ft::_Identity<int>()(777) << std::endl;  // 자기 자신을 반환함
+}
+```
+
