@@ -3,7 +3,7 @@
 
 namespace ft {
 
-  template<typename _Tp, typename Container = std::deque<_Tp> >
+  template<typename _Tp, typename Container = ft::vector<_Tp> >
     class stack
     {
       template<typename _Tp1, typename _Seq1>
