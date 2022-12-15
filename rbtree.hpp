@@ -565,14 +565,10 @@ public:
 public:
     /* insert/erase */
   ft::pair<iterator,bool> insert_unique(const value_type& __x);
-  iterator insert_equal(const value_type& __x);
   iterator insert_unique(const_iterator __position, const value_type& __x);
-  iterator insert_equal(const_iterator __position, const value_type& __x);
 
   template <class _InputIterator>
   void insert_unique(_InputIterator __first, _InputIterator __last);
-  template <class _InputIterator>
-  void insert_equal(_InputIterator __first, _InputIterator __last);
 
   // why parameter is const_iterator? because the iterator of ft::set is the const_iterator of _Rb_tree
   // so, when erase(iterator __position) is executed, it evaluates to below 
@@ -738,23 +734,6 @@ _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
 
 template <class _Key, class _Value, class _KeyOfValue, 
           class _Compare, class _Alloc>
-typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator
-_Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
-  ::insert_equal(const _Value& __v) 
-{
-  _Link_type __y = _M_header; // parent
-  _Link_type __x = _M_root(); // child (move down till reaching NIL node)
-  while (__x != 0) {
-    __y = __x;
-    __x = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)) ?  // v < x
-            _S_left(__x) : _S_right(__x);
-  }
-  return _M_insert(__x, __y, __v);
-}
-
-
-template <class _Key, class _Value, class _KeyOfValue, 
-          class _Compare, class _Alloc>
 ft::pair<typename _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>::iterator, bool>
 _Rb_tree<_Key,_Value,_KeyOfValue,_Compare,_Alloc>
   ::insert_unique(const _Value& __v)  // if not unique, don't insert
@@ -816,49 +795,6 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>
     else 
       return insert_unique(__v).first;
   }
-}
-
-template <class _Key, class _Val, class _KeyOfValue, 
-          class _Compare, class _Alloc>
-typename _Rb_tree<_Key,_Val,_KeyOfValue,_Compare,_Alloc>::iterator 
-_Rb_tree<_Key,_Val,_KeyOfValue,_Compare,_Alloc>
-  ::insert_equal(const_iterator __position, const _Val& __v)
-{
-  // __position == begin()
-  if (__position._M_node == _M_header->_M_left) {
-    if (size() > 0 && !_M_key_compare(_S_key(__position._M_node), _KeyOfValue()(__v)))  // __v < leftMost();
-      return _M_insert(__position._M_node, __position._M_node, __v);
-    else
-      return insert_equal(__v);
-  }
-  // __position == end()
-  else if (__position._M_node == _M_header) {
-    if (!_M_key_compare(_KeyOfValue()(__v), _S_key(_M_rightmost())))  // __v >= rightMose()
-      return _M_insert(0, _M_rightmost(), __v);
-    else
-      return insert_equal(__v);
-  } else {
-    const_iterator __before = __position;
-    --__before;
-    // before <= v <= position
-    if (!_M_key_compare(_KeyOfValue()(__v), _S_key(__before._M_node))
-        && !_M_key_compare(_S_key(__position._M_node), _KeyOfValue()(__v))) {
-      if (_S_right(__before._M_node) == 0)
-        return _M_insert(0, __before._M_node, __v); 
-      else
-        return _M_insert(__position._M_node, __position._M_node, __v);
-    } else
-      return insert_equal(__v);
-  }
-}
-
-template <class _Key, class _Val, class _KoV, class _Cmp, class _Alloc>
-  template<class _II>
-void _Rb_tree<_Key,_Val,_KoV,_Cmp,_Alloc>
-  ::insert_equal(_II __first, _II __last)
-{
-  while (__first != __last) 
-    insert_equal(*__first++);
 }
 
 template <class _Key, class _Val, class _KoV, class _Cmp, class _Alloc> 
