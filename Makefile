@@ -1,48 +1,34 @@
-SRCS = main.cpp	\
-	algorithm_std.cpp	\
-	algorithm.cpp \
-	insert_std.cpp \
-	insert.cpp \
-	insert2_std.cpp \
-	insert2.cpp \
-	iterator_std.cpp \
-	iterator.cpp \
-	type_traits.cpp \
-	utility_std.cpp \
-	utility.cpp \
-	vector_std.cpp \
-	vector.cpp \
-	wrap_iterator_std.cpp \
-	wrap_iterator.cpp 
-
-INCS = algorithm.hpp \
-	function_base.hpp \
-	iterator.hpp \
-	map.hpp \
-	rbtree.hpp \
-	set.hpp \
-	stack.hpp \
-	type_traits.hpp \
-	utility.hpp \
-	vector.hpp \
-	wrap_iterator.hpp 
+FILENAME = 	\
+	algorithm_std	\
+	algorithm \
+	insert_std \
+	insert \
+	insert2_std \
+	insert2 \
+	iterator_std \
+	iterator \
+	type_traits \
+	utility_std \
+	utility \
+	vector_std \
+	vector \
+	wrap_iterator_std \
+	wrap_iterator \
+	main \
 
 CXX = c++
-NAME = a.out
-
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
-OBJS = $(SRCS:.cpp=.o)
 
+all: $(FILENAME)
 
-all: $(NAME)
+$(FILENAME):
+	$(CXX) $(CXXFLAGS) $@.cpp -o $@
 
-$(NAME): $(OBJS)
-	
 clean:
-	rm -f $(OBJS)
+	rm -f $(FILENAME)
 
 fclean: clean
-	rm -f $(NAME)
+	rm -f $(FILENAME)
 
 re:
 	make fclean
